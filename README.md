@@ -1,6 +1,12 @@
-# Play Some Music Skill
+## play some music
+Play internet radio station.
 
-## Usage:
-* `play some music`
-* By default the Play Some Music Skill plays an internet radio station from GreatestHits.rocks.  To change the
-* station edit the __init__.py file and change the station parameter at the top of the script. 
+## Description 
+Play internet radio station using Mycroft.
+
+## Examples 
+* "play some music"
+
+## Credits 
+Norman Moore
+
