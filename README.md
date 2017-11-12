@@ -1,6 +1,6 @@
-# Hello World Skill
+# Play Some Music Skill
 
 ## Usage:
-* `hello world`
-* `how are you`
-* `thank you`
+* `play some music`
+* By default the Play Some Music Skill plays an internet radio station from GreatestHits.rocks.  To change the
+* station edit the __init__.py file and change the station parameter at the top of the script. 

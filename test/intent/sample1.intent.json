@@ -1,7 +1,7 @@
 {
-  "utterance": "Thank you",
-  "intent_type": "ThankYouIntent",
+  "utterance": "Play Some Music",
+  "intent_type": "PlaySomeMusicIntent",
   "intent": {
-    "ThankYouKeyword": "thank you"
+    "PlaySomeMusicKeyword": "play some music"
   }
 }

@@ -15,47 +15,50 @@
 # You should have received a copy of the GNU General Public License
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
+station = 'http://144.217.253.136:8564/stream'
+
 from adapt.intent import IntentBuilder
 
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
+try:
+    from mycroft.skills.audioservice import AudioService
+except:
+    from mycroft.util import play_mp3
+    AudioService = None
 
-__author__ = 'eward'
+__author__ = 'nmoore'
+
 
 LOGGER = getLogger(__name__)
 
 
-class HelloWorldSkill(MycroftSkill):
+class PlaySomeMusicSkill(MycroftSkill):
     def __init__(self):
-        super(HelloWorldSkill, self).__init__(name="HelloWorldSkill")
+        super(PlaySomeMusicSkill, self).__init__(name="PlaySomeMusicSkill")
+        self.audioservice = None
 
     def initialize(self):
-        thank_you_intent = IntentBuilder("ThankYouIntent"). \
-            require("ThankYouKeyword").build()
-        self.register_intent(thank_you_intent, self.handle_thank_you_intent)
+        play_some_music_intent = IntentBuilder("PlaySomeMusicIntent"). \
+            require("PlaySomeMusicKeyword").build()
+        self.register_intent(play_some_music_intent,
+                             self.handle_play_some_music_intent)
+   
+        if AudioService:
+            self.audioservice = AudioService(self.emitter)
 
-        how_are_you_intent = IntentBuilder("HowAreYouIntent"). \
-            require("HowAreYouKeyword").build()
-        self.register_intent(how_are_you_intent,
-                             self.handle_how_are_you_intent)
+    def handle_play_some_music_intent(self, message):
+        self.stop()
+        self.speak_dialog("play.some.music")
 
-        hello_world_intent = IntentBuilder("HelloWorldIntent"). \
-            require("HelloWorldKeyword").build()
-        self.register_intent(hello_world_intent,
-                             self.handle_hello_world_intent)
-
-    def handle_thank_you_intent(self, message):
-        self.speak_dialog("welcome")
-
-    def handle_how_are_you_intent(self, message):
-        self.speak_dialog("how.are.you")
-
-    def handle_hello_world_intent(self, message):
-        self.speak_dialog("hello.world")
+        if self.audioservice:
+                self.audioservice.play(station)
+        else: # othervice use normal mp3 playback
+                self.process = play_mp3(station)
 
     def stop(self):
         pass
 
 
 def create_skill():
-    return HelloWorldSkill()
+    return PlaySomeMusicSkill()
