@@ -17,8 +17,10 @@
 
 station = 'http://144.217.253.136:8564/stream'
 
-from adapt.intent import IntentBuilder
+import time
+import re
 
+from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
 try:
@@ -37,28 +39,43 @@ class PlaySomeMusicSkill(MycroftSkill):
     def __init__(self):
         super(PlaySomeMusicSkill, self).__init__(name="PlaySomeMusicSkill")
         self.audioservice = None
+        self.process = None
 
     def initialize(self):
         play_some_music_intent = IntentBuilder("PlaySomeMusicIntent"). \
             require("PlaySomeMusicKeyword").build()
         self.register_intent(play_some_music_intent,
                              self.handle_play_some_music_intent)
+
+        intent = IntentBuilder("PlaySomeMusicStopIntent") \
+                .require("PlaySomeMusicStopVerb") \
+                .require("PlaySomeMusicKeyword").build()
+        self.register_intent(intent, self.handle_stop)
    
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
     def handle_play_some_music_intent(self, message):
-        self.stop()
-        self.speak_dialog("play.some.music")
+           self.stop()
+           self.speak_dialog("play.some.music")
+           time.sleep(4)
 
-        if self.audioservice:
+            if self.audioservice:
                 self.audioservice.play(station)
-        else: # othervice use normal mp3 playback
+            else: # othervice use normal mp3 playback
                 self.process = play_mp3(station)
 
-    def stop(self):
-        pass
+     def handle_stop(self, message):
+        self.stop()
+        self.speak_dialog('play.some.music.stop')
 
+    def stop(self):
+        if self.audioservice:
+            self.audioservice.stop()
+        else:
+            if self.process and self.process.poll() is None:
+                self.process.terminate()
+                self.process.wait()
 
 def create_skill():
     return PlaySomeMusicSkill()
