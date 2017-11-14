@@ -1,0 +1,8 @@
+{
+  "utterance": "stop the music",
+  "intent_type": "PlaySomeMusicStopIntent",
+  "intent": {
+    "PlaySomeMusicKeyword": "play some music",
+    "PlaySomeMusicStopVerb": "stop"
+  }
+}
