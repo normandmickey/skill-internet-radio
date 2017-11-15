@@ -42,10 +42,9 @@ class PlaySomeMusicSkill(MycroftSkill):
         self.process = None
 
     def initialize(self):
-        play_some_music_intent = IntentBuilder("PlaySomeMusicIntent"). \
-            require("PlaySomeMusicKeyword").build()
-        self.register_intent(play_some_music_intent,
-                             self.handle_play_some_music_intent)
+        intent = IntentBuilder("PlaySomeMusicIntent").require(
+             "PlaySomeMusicKeyword").build()
+        self.register_intent(intent, self.handle_intent)
 
         intent = IntentBuilder("PlaySomeMusicStopIntent") \
                 .require("PlaySomeMusicStopVerb") \
@@ -55,27 +54,27 @@ class PlaySomeMusicSkill(MycroftSkill):
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
-    def handle_play_some_music_intent(self, message):
+    def handle_intent(self, message):
            self.stop()
-           self.speak_dialog("play.some.music")
+           self.speak_dialog('play.some.music')
            time.sleep(4)
 
-            if self.audioservice:
-                self.audioservice.play(station)
-            else: # othervice use normal mp3 playback
-                self.process = play_mp3(station)
+           if self.audioservice:
+               self.audioservice.play(station)
+           else: # othervice use normal mp3 playback
+               self.process = play_mp3(station)
 
-     def handle_stop(self, message):
+    def handle_stop(self, message):
         self.stop()
         self.speak_dialog('play.some.music.stop')
 
     def stop(self):
         if self.audioservice:
-            self.audioservice.stop()
+           self.audioservice.stop()
         else:
             if self.process and self.process.poll() is None:
-                self.process.terminate()
-                self.process.wait()
+               self.process.terminate()
+               self.process.wait()
 
 def create_skill():
     return PlaySomeMusicSkill()
