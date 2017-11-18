@@ -1,0 +1,24 @@
+{
+    "name": "Play-Some-Music",
+    "skillMetadata": {
+        "sections": [
+            {
+                "name": "Station URL",
+                "fields": [
+                    {
+                        "name": "station_url",
+                        "type": "text",
+                        "label": "Station URL",
+                        "value": "http://144.217.253.136:8564/stream"
+                    },
+                    {
+                        "name": "genre",
+                        "type": "text",
+                        "label": "Genre",
+                        "value": "Rock"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -60,9 +60,9 @@ class PlaySomeMusicSkill(MycroftSkill):
            time.sleep(4)
 
            if self.audioservice:
-               self.audioservice.play(station)
+               self.audioservice.play(self.settings['station_url'])
            else: # othervice use normal mp3 playback
-               self.process = play_mp3(station)
+               self.process = play_mp3(self.settings['station_url'])
 
     def handle_stop(self, message):
         self.stop()
