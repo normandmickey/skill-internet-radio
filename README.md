@@ -1,11 +1,12 @@
-## play some music
+## internet radio
 Play internet radio station.
 
 ## Description 
 Play internet radio station using Mycroft.
 
 ## Examples 
-* "play some music"
+* "internet radio"
+* "web radio"
 
 ## Credits 
 Norman Moore
