@@ -35,20 +35,20 @@ __author__ = 'nmoore'
 LOGGER = getLogger(__name__)
 
 
-class PlaySomeMusicSkill(MycroftSkill):
+class InternetRadioSkill(MycroftSkill):
     def __init__(self):
-        super(PlaySomeMusicSkill, self).__init__(name="PlaySomeMusicSkill")
+        super(InternetRadioSkill, self).__init__(name="InternetRadioSkill")
         self.audioservice = None
         self.process = None
 
     def initialize(self):
-        intent = IntentBuilder("PlaySomeMusicIntent").require(
-             "PlaySomeMusicKeyword").build()
+        intent = IntentBuilder("InternetRadioIntent").require(
+             "InternetRadioKeyword").build()
         self.register_intent(intent, self.handle_intent)
 
-        intent = IntentBuilder("PlaySomeMusicStopIntent") \
-                .require("PlaySomeMusicStopVerb") \
-                .require("PlaySomeMusicKeyword").build()
+        intent = IntentBuilder("InternetRadioStopIntent") \
+                .require("InternetRadioStopVerb") \
+                .require("InternetRadioKeyword").build()
         self.register_intent(intent, self.handle_stop)
    
         if AudioService:
@@ -56,7 +56,7 @@ class PlaySomeMusicSkill(MycroftSkill):
 
     def handle_intent(self, message):
            self.stop()
-           self.speak_dialog('play.some.music')
+           self.speak_dialog('internet.radio')
            time.sleep(4)
 
            if self.audioservice:
@@ -66,7 +66,7 @@ class PlaySomeMusicSkill(MycroftSkill):
 
     def handle_stop(self, message):
         self.stop()
-        self.speak_dialog('play.some.music.stop')
+        self.speak_dialog('internet.radio.stop')
 
     def stop(self):
         if self.audioservice:
@@ -77,4 +77,4 @@ class PlaySomeMusicSkill(MycroftSkill):
                self.process.wait()
 
 def create_skill():
-    return PlaySomeMusicSkill()
+    return InternetRadioSkill()

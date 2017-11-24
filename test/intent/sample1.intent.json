@@ -1,7 +1,7 @@
 {
-  "utterance": "Play Some Music",
-  "intent_type": "PlaySomeMusicIntent",
+  "utterance": "Internet Radio",
+  "intent_type": "InternetRadioIntent",
   "intent": {
-    "PlaySomeMusicKeyword": "play some music"
+    "InternetRadioKeyword": "internet radio"
   }
 }

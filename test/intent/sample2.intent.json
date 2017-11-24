@@ -1,8 +1,8 @@
 {
-  "utterance": "stop the music",
-  "intent_type": "PlaySomeMusicStopIntent",
+  "utterance": "stop",
+  "intent_type": "InternetRadioStopIntent",
   "intent": {
-    "PlaySomeMusicKeyword": "play some music",
-    "PlaySomeMusicStopVerb": "stop"
+    "InternetRadioKeyword": "internet radio",
+    "InternetRadioStopVerb": "stop"
   }
 }
