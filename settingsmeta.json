@@ -45,6 +45,39 @@
                         "value": "http://174.36.206.197:8000"
                     }
                 ]
+            },
+            {
+                "name": "Top 40 Station URL",
+                "fields": [
+                    {
+                        "name": "top40_station_url",
+                        "type": "text",
+                        "label": "Top 40 Station URL",
+                        "value": "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_p"
+                    }
+                ]
+            },
+            {
+                "name": "Christmas Station URL",
+                "fields": [
+                    {
+                        "name": "christmas_station_url",
+                        "type": "text",
+                        "label": "Christmas Station URL",
+                        "value": "http://144.217.180.30:8016/stream"
+                    }
+                ]
+            },
+            {
+                "name": "Jazz Station URL",
+                "fields": [
+                    {
+                        "name": "jazz_station_url",
+                        "type": "text",
+                        "label": "Jazz Station URL",
+                        "value": "http://149.56.155.209:80/live"
+                    }
+                ]
             }
         ]
     }
