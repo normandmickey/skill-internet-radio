@@ -14,6 +14,7 @@ Manage your station URLs at home.mycroft.ai -> Skills.
 * "classical radio"
 * "country radio"
 * "jazz radio"
+* "top 40 radio"
 * "christmas radio"
 
 ## Credits 
