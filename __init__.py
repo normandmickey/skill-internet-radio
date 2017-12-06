@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
-station = 'http://144.217.253.136:8564/stream'
-
 import time
 import re
 
@@ -46,6 +44,18 @@ class InternetRadioSkill(MycroftSkill):
              "InternetRadioKeyword").build()
         self.register_intent(intent, self.handle_intent)
 
+        intent = IntentBuilder("CountryRadioIntent").require(
+             "CountryRadioKeyword").build()
+        self.register_intent(intent, self.handle_country_intent)
+
+        intent = IntentBuilder("RockRadioIntent").require(
+             "RockRadioKeyword").build()
+        self.register_intent(intent, self.handle_rock_intent)
+
+        intent = IntentBuilder("ClassicalRadioIntent").require(
+             "ClassicalRadioKeyword").build()
+        self.register_intent(intent, self.handle_classical_intent)
+
         intent = IntentBuilder("InternetRadioStopIntent") \
                 .require("InternetRadioStopVerb") \
                 .require("InternetRadioKeyword").build()
@@ -64,6 +74,36 @@ class InternetRadioSkill(MycroftSkill):
            else: # othervice use normal mp3 playback
                self.process = play_mp3(self.settings['station_url'])
 
+    def handle_country_intent(self, message):
+           self.stop()
+           self.speak_dialog('internet.radio')
+           time.sleep(4)
+
+           if self.audioservice:
+               self.audioservice.play(self.settings['country_station_url'])
+           else: # othervice use normal mp3 playback
+               self.process = play_mp3(self.settings['country_station_url'])
+
+    def handle_rock_intent(self, message):
+           self.stop()
+           self.speak_dialog('internet.radio')
+           time.sleep(4)
+
+           if self.audioservice:
+               self.audioservice.play(self.settings['rock_station_url'])
+           else: # othervice use normal mp3 playback
+               self.process = play_mp3(self.settings['rock_station_url'])
+    
+    def handle_classical_intent(self, message):
+           self.stop()
+           self.speak_dialog('internet.radio')
+           time.sleep(4)
+
+           if self.audioservice:
+               self.audioservice.play(self.settings['classical_station_url'])
+           else: # othervice use normal mp3 playback
+               self.process = play_mp3(self.settings['classical_station_url'])
+             
     def handle_stop(self, message):
         self.stop()
         self.speak_dialog('internet.radio.stop')

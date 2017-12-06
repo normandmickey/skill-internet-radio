@@ -3,19 +3,46 @@
     "skillMetadata": {
         "sections": [
             {
-                "name": "Station URL",
+                "name": "Favorite Station URL",
                 "fields": [
                     {
                         "name": "station_url",
                         "type": "text",
-                        "label": "Station URL",
+                        "label": "Favorite Station URL",
                         "value": "http://144.217.253.136:8564/stream"
-                    },
+                    }
+                ]
+            },
+            {
+                "name": "Rock Station URL",
+                "fields": [
                     {
-                        "name": "genre",
+                        "name": "rock_station_url",
                         "type": "text",
-                        "label": "Genre",
-                        "value": "Rock"
+                        "label": "Rock Station URL",
+                        "value": "http://144.217.253.136:8564/stream"
+                    }
+                ]
+            },
+            {
+                "name": "Country Station URL",
+                "fields": [
+                    {
+                        "name": "country_station_url",
+                        "type": "text",
+                        "label": "Country Station URL",
+                        "value": "http://50.7.70.58:8708/"
+                    }
+                ]
+            },
+            {
+                "name": "Classical Station URL",
+                "fields": [
+                    {
+                        "name": "classical_station_url",
+                        "type": "text",
+                        "label": "Classical Station URL",
+                        "value": "http://174.36.206.197:8000"
                     }
                 ]
             }
