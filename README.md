@@ -2,7 +2,8 @@
 Play internet radio station.
 
 ## Description 
-Play internet radio stations using Mycroft.  Manage station URLs at home.mycroft.ai -> Skills.
+Play internet radio stations using Mycroft.  
+Manage your station URLs at home.mycroft.ai -> Skills.
 
 ## Examples 
 * "internet radio"
@@ -11,6 +12,9 @@ Play internet radio stations using Mycroft.  Manage station URLs at home.mycroft
 * "rock radio"
 * "country radio"
 * "classical radio"
+* "country radio"
+* "jazz radio"
+* "christmas radio"
 
 ## Credits 
 Norman Moore
