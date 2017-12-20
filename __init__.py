@@ -68,6 +68,10 @@ class InternetRadioSkill(MycroftSkill):
              "ChristmasRadioKeyword").build()
         self.register_intent(intent, self.handle_christmas_intent)
 
+        intent = IntentBuilder("ChildrensRadioIntent").require(
+             "ChildrensRadioKeyword").build()
+        self.register_intent(intent, self.handle_childrens_intent)
+
         intent = IntentBuilder("InternetRadioStopIntent") \
                 .require("InternetRadioStopVerb") \
                 .require("InternetRadioKeyword").build()
