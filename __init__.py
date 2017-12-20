@@ -150,6 +150,16 @@ class InternetRadioSkill(MycroftSkill):
            else: # othervice use normal mp3 playback
                self.process = play_mp3(self.settings['christmas_station_url'])
              
+    def handle_childrens_intent(self, message):
+           self.stop()
+           self.speak_dialog('internet.radio')
+           time.sleep(4)
+
+           if self.audioservice:
+               self.audioservice.play(self.settings['childrens_station_url'])
+           else: # othervice use normal mp3 playback
+               self.process = play_mp3(self.settings['childrens_station_url'])
+             
     def handle_stop(self, message):
         self.stop()
         self.speak_dialog('internet.radio.stop')
