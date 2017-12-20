@@ -69,6 +69,17 @@
                 ]
             },
             {
+                "name": "Children's Station URL",
+                "fields": [
+                    {
+                        "name": "childrens_station_url",
+                        "type": "text",
+                        "label": "Children's Station URL",
+                        "value": "http://14123.live.streamtheworld.com/SAM01AAC213_SC"
+                    }
+                ]
+            },
+            {
                 "name": "Jazz Station URL",
                 "fields": [
                     {
