@@ -17,6 +17,8 @@
 
 import time
 import re
+import requests
+import json
 
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
@@ -43,6 +45,10 @@ class InternetRadioSkill(MycroftSkill):
         intent = IntentBuilder("InternetRadioIntent").require(
              "InternetRadioKeyword").build()
         self.register_intent(intent, self.handle_intent)
+
+        intent = IntentBuilder("HarkIntent").require(
+             "HarkKeyword").require("RadioSearch").build()
+        self.register_intent(intent, self.handle_hark_intent)
 
         intent = IntentBuilder("CountryRadioIntent").require(
              "CountryRadioKeyword").build()
@@ -84,11 +90,27 @@ class InternetRadioSkill(MycroftSkill):
            self.stop()
            self.speak_dialog('internet.radio')
            time.sleep(4)
+           search_string = message.data.get('RadioSearch')
 
            if self.audioservice:
                self.audioservice.play(self.settings['station_url'])
            else: # othervice use normal mp3 playback
                self.process = play_mp3(self.settings['station_url'])
+
+    def handle_hark_intent(self, message):
+           self.stop()
+           self.speak_dialog('internet.radio')
+           time.sleep(4)
+           search_string = message.data.get('RadioSearch')
+           s_details = requests.get('http://greatesthits.rocks:5000/station')
+           stations = s_details.json()
+           stream_url2 = 'none'
+           for station in stations:
+               if (search_string).lower() == station['name'].lower():
+                  stream_url = station['url']
+                  stream_url2 = stream_url.encode('utf-8')
+                  self.audioservice.play(stream_url2)
+                  break
 
     def handle_country_intent(self, message):
            self.stop()
