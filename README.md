@@ -27,6 +27,13 @@ Manage your station URLs at home.mycroft.ai -> Skills.
 * "christmas radio"
 * "play christmas radio"
 * "listen to christmas radio"
+* "psytube web radio"
+* "drum and bass web radio"
+* "techno radio"
+* "minimal techno radio"
+* "techno radio"
+* "play goa psy trance"
+* "listen to progressive psy trance"
 
 ## Credits 
 Norman Moore
