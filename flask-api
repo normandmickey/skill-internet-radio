@@ -1,0 +1,83 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+import os
+
+app = Flask(__name__)
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'crud.sqlite')
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+
+
+class Station(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    url = db.Column(db.String(120), unique=True)
+
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
+
+
+class StationSchema(ma.Schema):
+    class Meta:
+        # Fields to expose
+        fields = ('name', 'url')
+
+
+station_schema = StationSchema()
+stations_schema = StationSchema(many=True)
+
+
+# endpoint to create new Station
+@app.route("/station", methods=["POST"])
+def add_station():
+    name = request.json['name']
+    url = request.json['url']
+
+    new_station = Station(name, url)
+
+    db.session.add(new_station)
+    db.session.commit()
+
+    return jsonify(new_station)
+
+# endpoint to show all Stations
+@app.route("/station", methods=["GET"])
+def get_station():
+    all_stations = Station.query.all()
+    result = stations_schema.dump(all_stations)
+    return jsonify(result.data)
+
+
+# endpoint to get Station detail by id
+@app.route("/station/<id>", methods=["GET"])
+def station_detail(id):
+    station = Station.query.get(id)
+    return station_schema.jsonify(station)
+
+# endpoint to update Station
+@app.route("/station/<id>", methods=["PUT"])
+def station_update(id):
+    station = Station.query.get(id)
+    name = request.json['name']
+    url = request.json['url']
+
+    station.url = url
+    station.name = name
+
+    db.session.commit()
+    return station_schema.jsonify(station)
+
+# endpoint to delete Station
+@app.route("/station/<id>", methods=["DELETE"])
+def station_delete(id):
+    station = Station.query.get(id)
+    db.session.delete(station)
+    db.session.commit()
+
+    return station_schema.jsonify(station)
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
