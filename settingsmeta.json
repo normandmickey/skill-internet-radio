@@ -89,6 +89,138 @@
                         "value": "http://149.56.155.209:80/live"
                     }
                 ]
+            },
+            {
+                "name": "Minimal Techno Station URL",
+                "fields": [
+                    {
+                        "name": "minimal_techno_station_url",
+                        "type": "text",
+                        "label": "Minimal Techno Station URL",
+                        "value": "http://www.psytube.at:14120/"
+                    }
+                ]
+            },
+            {
+                "name": "Techno Station URL",
+                "fields": [
+                    {
+                        "name": "techno_station_url",
+                        "type": "text",
+                        "label": "Techno Station URL",
+                        "value": "http://www.psytube.at:19120/"
+                    }
+                ]
+            },
+            {
+                "name": "Drum&Bass Station URL",
+                "fields": [
+                    {
+                        "name": "drumnbass_station_url",
+                        "type": "text",
+                        "label": "Drum&Bass Station URL",
+                        "value": "http://www.psytube.at:11120/"
+                    }
+                ]
+            },
+            {
+                "name": "Progressive PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "progressive_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Progressive PsyTrance Station URL",
+                        "value": "http://www.psytube.at:12120/"
+                    }
+                ]
+            },
+            {
+                "name": "Dark Progressive PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "dark_progressive_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Dark Progressive PsyTrance Station URL",
+                        "value": "http://www.psytube.at:17120/"
+                    }
+                ]
+            },
+            {
+                "name": "Goa PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "goa_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Goa PsyTrance Station URL",
+                        "value": "http://www.psytube.at:9120/"
+                    }
+                ]
+            },
+            {
+                "name": "FullOn PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "fullon_psy_trance_station_url",
+                        "type": "text",
+                        "label": "FullOn PsyTrance Station URL",
+                        "value": "http://www.psytube.at:13120/"
+                    }
+                ]
+            },
+            {
+                "name": "Suomi PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "suomi_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Suomi PsyTrance Station URL",
+                        "value": "http://www.psytube.at:16120/"
+                    }
+                ]
+            },
+            {
+                "name": "Forest PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "forest_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Forest PsyTrance Station URL",
+                        "value": "http://www.psytube.at:15120/"
+                    }
+                ]
+            },
+            {
+                "name": "Dark PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "dark_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Dark PsyTrance Station URL",
+                        "value": "http://www.psytube.at:8120/"
+                    }
+                ]
+            },
+            {
+                "name": "HiTech/Core PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "hitech_psy_trance_station_url",
+                        "type": "text",
+                        "label": "HiTech/Core PsyTrance Station URL",
+                        "value": "http://www.psytube.at:18120/"
+                    }
+                ]
+            },
+            {
+                "name": "Orochill PsyTrance Station URL",
+                "fields": [
+                    {
+                        "name": "orochill_psy_trance_station_url",
+                        "type": "text",
+                        "label": "Orochill PsyTrance Station URL",
+                        "value": "http://www.psytube.at:10120/"
+                    }
+                ]
             }
         ]
     }
