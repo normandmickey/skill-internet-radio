@@ -34,6 +34,8 @@ Manage your station URLs at home.mycroft.ai -> Skills.
 * "techno radio"
 * "play goa psy trance"
 * "listen to progressive psy trance"
+## How to change stations
+Open the stream file (e.g. .pls, .m3u, etc.) in a text editor, copy the URL within, paste it into the skill's setting at [home.mycroft.ai](home.mycroft.ai) and save the changes.
 
 ## Credits 
 Norman Moore
