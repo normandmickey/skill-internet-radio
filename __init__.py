@@ -398,9 +398,9 @@ class InternetRadioSkill(MycroftSkill):
            time.sleep(4)
 
            if self.audioservice:
-               self.audioservice.play(self.settings['favorite_station_url'])
+               self.audioservice.play(self.settings['station_url'])
            else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['favorite_station_url'])
+               self.process = play_mp3(self.settings['station_url'])
              
     def handle_childrens_intent(self, message):
            self.stop()
