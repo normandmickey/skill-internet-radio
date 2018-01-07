@@ -6,7 +6,7 @@
                 "name": "Favorite Station URL",
                 "fields": [
                     {
-                        "name": "station_url",
+                        "name": "favorite_station_url",
                         "type": "text",
                         "label": "Favorite Station URL",
                         "value": "http://144.217.253.136:8564/stream"
