@@ -46,9 +46,18 @@ class InternetRadioSkill(MycroftSkill):
         super(InternetRadioSkill, self).__init__()
         self.audioservice = None
         self.process = None
-        self.stations = self.settings.get("stations", {})
+
 
     def initialize(self):
+        if "stations" not in self.settings:
+            self.settings["stations"] = {}
+        if "station_files" not in self.settings:
+            self.settings["station_files"] = join(self.root_dir, "radios")
+        if "min_score" not in self.settings:
+            self.settings["min_score"] = 0.5
+
+        self.stations = self.settings.get("stations", {})
+
         self.get_stations()
 
         intent = IntentBuilder("InternetRadioIntent") \
@@ -65,8 +74,7 @@ class InternetRadioSkill(MycroftSkill):
         # TODO read remote config stations
 
         # read configured radio stations
-        styles = listdir(self.settings.get("station_files",
-                                              join(self.root_dir, "radios")))
+        styles = listdir(self.settings.get("station_files"))
 
         stations = {}
         for style in styles:
