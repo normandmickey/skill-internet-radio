@@ -161,10 +161,7 @@ class InternetRadioSkill(MycroftSkill):
         self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA", x=24,
                                      refresh=False)
         # music code
-        if track in self.settings["stations"]["metal"]:
-            png = join(self.root_dir, "metal.png")
-        else:
-            png = join(self.root_dir, "music.png")
+        png = join(self.root_dir, "music.png")
 
         self.enclosure.mouth_display_png(png,
                                threshold=70,
