@@ -75,6 +75,7 @@ class InternetRadioSkill(MycroftSkill):
             stations[style] = []
             result = self.translate_namedradios(style)
             for station in result:
+                station = station.rstrip().lstrip()
                 stations[station] = [result[station]]
                 stations[style].append(result[station])
 
