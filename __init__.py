@@ -192,15 +192,18 @@ class InternetRadioSkill(MycroftSkill):
         if ".pls" in track:
             if AudioService is None:
                 return False
-            elif not self.check_vlc():
+            elif not self.vlc_installed():
                 return False
         return True
 
     def check_vlc(self):
         if AudioService is None:
             self.speak_dialog("audio.missing")
+            return False
         elif not self.vlc_installed():
             self.speak_dialog("vlc.missing")
+            return False
+        return True
 
     def vlc_installed(self):
         # TODO fix me
