@@ -1,2 +1,2 @@
-playing {{ station }} internet radio
-you are now listening to {{ station }} internet radio
+playing {{ station }}
+you are now listening to {{ station }}
