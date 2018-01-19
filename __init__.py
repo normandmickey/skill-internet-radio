@@ -20,7 +20,6 @@ import requests
 import random
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
-from mycroft.util.log import getLogger
 
 try:
     from mycroft.skills.audioservice import AudioService
@@ -38,24 +37,21 @@ import csv
 
 __author__ = 'nmoore'
 
-LOGGER = getLogger(__name__)
-
 
 class InternetRadioSkill(MycroftSkill):
     def __init__(self):
         super(InternetRadioSkill, self).__init__()
         self.audioservice = None
         self.process = None
-
+        self.stations = {"favorite": ["http://somafm.com/groovesalad.pls"]}
 
     def initialize(self):
         if "stations" not in self.settings:
-            self.settings["stations"] = {}
+            self.settings["stations"] = {"favorite": ["http://somafm.com/groovesalad.pls"]}
         if "station_files" not in self.settings:
             self.settings["station_files"] = join(self.root_dir, "radios")
         if "min_score" not in self.settings:
             self.settings["min_score"] = 0.5
-
         self.stations = self.settings.get("stations", {})
 
         self.get_stations()
@@ -78,9 +74,12 @@ class InternetRadioSkill(MycroftSkill):
 
         stations = {}
         for style in styles:
+            style = style.replace(".value", "")
+            self.log.info(style)
             stations[style] = []
             result = self.translate_namedradios(style)
             for station in result:
+                self.log.info(station)
                 stations[station] = [result[station]]
                 stations[style].append(result[station])
 
@@ -101,6 +100,7 @@ class InternetRadioSkill(MycroftSkill):
         if not best_station:
             # guess if some station was requested
             utterance = message.utterance_remainder()
+            self.log.info("remainder: " + utterance)
             best_score = 0.0
             best_station = "favorite"
             for station in self.settings["stations"].keys():
@@ -145,7 +145,7 @@ class InternetRadioSkill(MycroftSkill):
             name += ".value"
 
         try:
-            with open(join(self.station_path, name)) as f:
+            with open(join(self.settings["station_files"], name)) as f:
                 reader = csv.reader(f, delimiter=delim)
                 for row in reader:
                     # skip blank or comment lines
@@ -157,12 +157,13 @@ class InternetRadioSkill(MycroftSkill):
                         result[row[0]] = []
                     result[row[0]].append(row[1])
             return result
-        except Exception:
+        except Exception as e:
+            LOG.error(e)
             return {}
 
     def stop(self):
         if self.audioservice:
-            if self.audioservice.is_playing():
+            if self.audioservice.is_playing:
                 self.speak_dialog('internet.radio.stop')
                 self.audioservice.stop()
         else:
