@@ -151,6 +151,7 @@ class InternetRadioSkill(MycroftSkill):
             else:
                 return False
         if self.audioservice:
+
             self.audioservice.play(track, utterance="vlc")
             if not name or "http" in name:
                 name = self.audioservice.track_info().get("name")
@@ -159,6 +160,8 @@ class InternetRadioSkill(MycroftSkill):
                     self.speak_dialog('internet.radio', {"station": name})
                     wait_while_speaking()
                     self.audioservice.resume()
+            self.enclosure.mouth_display(img_code="QIAAAAAAAAAAAAAOACADABIBIAMAMPAAAA", x=24,
+                                         refresh=False)
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
         return True
