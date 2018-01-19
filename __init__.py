@@ -156,10 +156,7 @@ class InternetRadioSkill(MycroftSkill):
             if not name or "http" in name:
                 name = self.audioservice.track_info().get("name")
             if name:
-                    self.audioservice.pause()
-                    self.speak_dialog('internet.radio', {"station": name})
-                    wait_while_speaking()
-                    self.audioservice.resume()
+                self.enclosure.mouth_text(name)
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
         # music code
@@ -213,7 +210,8 @@ class InternetRadioSkill(MycroftSkill):
             vlc = subprocess.check_output('dpkg -l vlc')
         except Exception as e:
             self.log.warning(e)
-            return False
+            # TODO fix me
+            return True
         if "no packages found matching" in vlc:
             return False
         return True
