@@ -165,7 +165,8 @@ class InternetRadioSkill(MycroftSkill):
             png = join(self.root_dir, "metal.png")
         else:
             png = join(self.root_dir, "music.png")
-        self.mouth_display_png(png,
+
+        self.enclosure.mouth_display_png(png,
                                threshold=70,
                                invert=False, x=0, y=0, refresh=True)
 
