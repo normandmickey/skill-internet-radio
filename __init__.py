@@ -22,10 +22,8 @@ try:
     from mycroft.skills.audioservice import AudioService
 except:
     from mycroft.util import play_mp3
-
     AudioService = None
 
-from mycroft.audio import wait_while_speaking
 from mycroft.util.parse import fuzzy_match
 from os.path import join
 from os import listdir
@@ -48,7 +46,7 @@ class InternetRadioSkill(MycroftSkill):
         if "station_files" not in self.settings:
             self.settings["station_files"] = join(self.root_dir, "radios")
         if "min_score" not in self.settings:
-            self.settings["min_score"] = 0.5
+            self.settings["min_score"] = 0.3
 
         self.get_stations()
 
@@ -120,29 +118,21 @@ class InternetRadioSkill(MycroftSkill):
                 best_station = best_station if len(best_station) < len(
                     station) else station
 
-        # choose a random track for this station/style name
-        self.speak_dialog('internet.radio', {"station": best_station})
         tracks = self.settings["stations"][best_station]
-        wait_while_speaking()
         if not self.play_track(tracks):
             self.speak_dialog("invalid.track", {"station": best_station})
 
     def handle_random_intent(self, message):
         # choose a random track for this station/style name
         best_station = random.choice(self.settings["stations"].keys())
-        self.speak_dialog('internet.radio', {"station": best_station})
         tracks = self.settings["stations"][best_station]
-        wait_while_speaking()
         if not self.play_track(tracks):
             self.speak_dialog("invalid.track", {"station": best_station})
 
     def handle_station_intent(self, message):
         best_station = message.data.get("InternetRadioStation")
         self.stop()
-        # choose a random track for this station/style name
-        self.speak_dialog('internet.radio', {"station": best_station})
         tracks = self.settings["stations"][best_station]
-        wait_while_speaking()
         if not self.play_track(tracks):
             self.speak_dialog("invalid.track", {"station": best_station})
 
@@ -157,6 +147,9 @@ class InternetRadioSkill(MycroftSkill):
             return False
         if self.audioservice:
             self.audioservice.play(track, utterance="vlc")
+            name = self.audioservice.track_info().get("name")
+            if name:
+                self.speak_dialog('internet.radio', {"station": name})
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
         return True
