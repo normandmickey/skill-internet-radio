@@ -151,21 +151,18 @@ class InternetRadioSkill(MycroftSkill):
             else:
                 return False
         if self.audioservice:
-
             self.audioservice.play(track, utterance="vlc")
-            if not name or "http" in name:
-                name = self.audioservice.track_info().get("name")
-            if name:
-                self.enclosure.mouth_text(name)
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
+
         # music code
-
-        code = "QIAAAAAAAAAAAAAOACADABIBIAMAMPAAAA"
         if track in self.settings["stations"]["metal"]:
-            code = "QIAAAAAIAACEBACEAFAJAPAAAJBABAOPAA"
-
-        self.enclosure.mouth_display(img_code=code, x=10, refresh=False)
+            text = "\m/"
+            self.enclosure.mouth_text(text)
+        else:
+            code = "QIAAAAAAAAAAAAAOACADABIBIAMAMPAAAA"
+            self.enclosure.mouth_display(img_code=code, x=10,
+                                         refresh=False)
         return True
 
     def translate_namedradios(self, name, delim=None):
