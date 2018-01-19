@@ -58,6 +58,12 @@ class InternetRadioSkill(MycroftSkill):
 
         self.register_intent(intent, self.handle_intent)
 
+        intent = IntentBuilder("RandomInternetRadioIntent") \
+            .optionally("PlayKeyword") \
+            .require("InternetRadioKeyword").require("RandomKeyword").build()
+
+        self.register_intent(intent, self.handle_random_intent)
+
         intent = IntentBuilder("InternetRadioStationIntent") \
             .require("InternetRadioStation")\
             .optionally("InternetRadioKeyword")\
@@ -115,6 +121,15 @@ class InternetRadioSkill(MycroftSkill):
                     station) else station
 
         # choose a random track for this station/style name
+        self.speak_dialog('internet.radio', {"station": best_station})
+        tracks = self.settings["stations"][best_station]
+        wait_while_speaking()
+        if not self.play_track(tracks):
+            self.speak_dialog("invalid.track", {"station": best_station})
+
+    def handle_random_intent(self, message):
+        # choose a random track for this station/style name
+        best_station = random.choice(self.settings["stations"].keys())
         self.speak_dialog('internet.radio', {"station": best_station})
         tracks = self.settings["stations"][best_station]
         wait_while_speaking()

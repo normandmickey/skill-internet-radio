@@ -30,6 +30,7 @@ enable the new station to be recognized by mycroft
 
 ## Examples
 
+* "random internet radio"
 * "internet radio"
 * "web radio"
 * "play some music"
