@@ -80,8 +80,8 @@ class InternetRadioSkill(MycroftSkill):
             result = self.translate_namedradios(style)
             for station in result:
                 station = station.rstrip().lstrip()
-                stations[station] = [result[station].rstrip().lstrip()]
-                stations[style].append(result[station].rstrip().lstrip())
+                stations[station] = [result[station]]
+                stations[style].append(result[station])
 
         # merge into settings
         for station in stations:
@@ -164,8 +164,8 @@ class InternetRadioSkill(MycroftSkill):
                     if len(row) != 2:
                         continue
                     if row[0] not in result.keys():
-                        result[row[0]] = []
-                    result[row[0]].append(row[1])
+                        result[row[0].rstrip().lstrip()] = []
+                    result[row[0]].append(row[1].rstrip().lstrip())
             return result
         except Exception as e:
             self.log.error(e)
