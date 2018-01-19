@@ -107,16 +107,17 @@ class InternetRadioSkill(MycroftSkill):
         self.log.info("remainder: " + utterance)
         best_score = 0.0
         best_station = "favorite"
-        for station in self.settings["stations"].keys():
-            score = fuzzy_match(station, utterance)
-            if best_score < self.settings.get("min_score", 0.5):
-                continue
-            if score > best_score:
-                best_station = station
-            elif score == best_score:
-                # chose the smallest name
-                best_station = best_station if len(best_station) < len(
-                    station) else station
+        if len(utterance):
+            for station in self.settings["stations"].keys():
+                score = fuzzy_match(station, utterance)
+                if best_score < self.settings.get("min_score", 0.5):
+                    continue
+                if score > best_score:
+                    best_station = station
+                elif score == best_score:
+                    # chose the smallest name
+                    best_station = best_station if len(best_station) < len(
+                        station) else station
 
         tracks = self.settings["stations"][best_station]
         if not self.play_track(tracks):
