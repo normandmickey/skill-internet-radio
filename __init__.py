@@ -55,8 +55,14 @@ class InternetRadioSkill(MycroftSkill):
 
         intent = IntentBuilder("InternetRadioIntent") \
             .optionally("PlayKeyword") \
-            .optionally("InternetRadioStation") \
             .require("InternetRadioKeyword").build()
+
+        self.register_intent(intent, self.handle_intent)
+
+        intent = IntentBuilder("InternetRadioStationIntent") \
+            .require("InternetRadioStation")\
+            .optionally("InternetRadioKeyword")\
+            .optionally("PlayKeyword").build()
 
         self.register_intent(intent, self.handle_intent)
 
@@ -90,25 +96,35 @@ class InternetRadioSkill(MycroftSkill):
             self.register_vocabulary(station, "InternetRadioStation")
 
     def handle_intent(self, message):
+        self.stop()
+        # guess if some station was requested
+        utterance = message.utterance_remainder()
+        self.log.info("remainder: " + utterance)
+        best_score = 0.0
+        best_station = "favorite"
+        for station in self.settings["stations"].keys():
+            score = fuzzy_match(station, utterance)
+            if best_score < self.settings.get("min_score", 0.5):
+                continue
+            if score > best_score:
+                best_station = station
+            elif score == best_score:
+                # chose the smallest name
+                best_station = best_station if len(best_station) < len(
+                    station) else station
+
+        # choose a random track for this station/style name
+        track = random.choice(self.settings["stations"][best_station])
+        self.speak_dialog('internet.radio', {"station": best_station})
+        wait_while_speaking()
+        if self.audioservice:
+            self.audioservice.play(track)
+        else:  # othervice use normal mp3 playback
+            self.process = play_mp3(track)
+
+    def handle_station_intent(self, message):
         best_station = message.data.get("InternetRadioStation")
         self.stop()
-
-        if not best_station:
-            # guess if some station was requested
-            utterance = message.utterance_remainder()
-            self.log.info("remainder: " + utterance)
-            best_score = 0.0
-            best_station = "favorite"
-            for station in self.settings["stations"].keys():
-                score = fuzzy_match(station, utterance)
-                if best_score < self.settings.get("min_score", 0.5):
-                    continue
-                if score > best_score:
-                    best_station = station
-                elif score == best_score:
-                    # chose the smallest name
-                    best_station = best_station if len(best_station) < len(
-                        station) else station
 
         # choose a random track for this station/style name
         track = random.choice(self.settings["stations"][best_station])
