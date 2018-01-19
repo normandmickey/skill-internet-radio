@@ -168,7 +168,7 @@ class InternetRadioSkill(MycroftSkill):
         if track in self.settings["stations"]["metal"]:
             code = "QIAAAAAIAACEBACEAFAJAPAAAJBABAOPAA"
 
-        self.enclosure.mouth_display(img_code=code, x=12, refresh=False)
+        self.enclosure.mouth_display(img_code=code, x=10, refresh=False)
         return True
 
     def translate_namedradios(self, name, delim=None):
@@ -208,9 +208,12 @@ class InternetRadioSkill(MycroftSkill):
         elif not self.vlc_installed():
             self.speak_dialog("vlc.missing")
 
-    @staticmethod
-    def vlc_installed():
-        vlc = subprocess.check_output('dpkg -l vlc')
+    def vlc_installed(self):
+        try:
+            vlc = subprocess.check_output('dpkg -l vlc')
+        except Exception as e:
+            self.log.warning(e)
+            return False
         if "no packages found matching" in vlc:
             return False
         return True
