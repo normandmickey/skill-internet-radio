@@ -139,12 +139,15 @@ class InternetRadioSkill(MycroftSkill):
     def play_track(self, tracks):
         if not isinstance(tracks, list):
             tracks = [tracks]
-        tracks = [track for track in tracks if ".pls" not in track]
         if not len(tracks):
             return False
         track = random.choice(tracks)
         if not self.check_track_support(track):
-            return False
+            tracks = [track for track in tracks if ".pls" not in track]
+            if len(tracks):
+                track = random.choice(tracks)
+            else:
+                return False
         if self.audioservice:
             self.audioservice.play(track, utterance="vlc")
             name = self.audioservice.track_info().get("name")
