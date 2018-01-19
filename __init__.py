@@ -156,10 +156,6 @@ class InternetRadioSkill(MycroftSkill):
 
         # Display info on a screen
         self.enclosure.deactivate_mouth_events()
-        self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA",
-                                     refresh=False)
-        self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA", x=24,
-                                     refresh=False)
         # music code
         png = join(self.root_dir, "music.png")
 
