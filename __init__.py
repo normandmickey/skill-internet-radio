@@ -31,6 +31,7 @@ from os.path import join
 from os import listdir
 import random
 import csv
+import subprocess
 
 __author__ = 'nmoore'
 
@@ -67,11 +68,7 @@ class InternetRadioSkill(MycroftSkill):
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
-    def get_intro_message(self):
-        if AudioService is None:
-            return "Some stations will fail to play because audio service " \
-                   "is missing, please upgrade mycroft-core"
-        # TODO check if vlc is available system wide
+        self.check_vlc()
 
     def get_stations(self):
         # TODO read remote config stations
@@ -95,7 +92,7 @@ class InternetRadioSkill(MycroftSkill):
             if station not in self.settings["stations"].keys():
                 self.settings["stations"][station] = stations[station]
 
-        # create padatious entity
+        # create vocabulary
         for station in self.settings["stations"].keys():
             self.register_vocabulary(station, "InternetRadioStation")
 
@@ -118,26 +115,36 @@ class InternetRadioSkill(MycroftSkill):
                     station) else station
 
         # choose a random track for this station/style name
-        track = random.choice(self.settings["stations"][best_station])
         self.speak_dialog('internet.radio', {"station": best_station})
+        tracks = self.settings["stations"][best_station]
         wait_while_speaking()
-        if self.audioservice:
-            self.audioservice.play(track, utterance="vlc")
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(track)
+        if not self.play_track(tracks):
+            self.speak_dialog("invalid.track", {"station": best_station})
 
     def handle_station_intent(self, message):
         best_station = message.data.get("InternetRadioStation")
         self.stop()
-
         # choose a random track for this station/style name
-        track = random.choice(self.settings["stations"][best_station])
         self.speak_dialog('internet.radio', {"station": best_station})
+        tracks = self.settings["stations"][best_station]
         wait_while_speaking()
+        if not self.play_track(tracks):
+            self.speak_dialog("invalid.track", {"station": best_station})
+
+    def play_track(self, tracks):
+        if not isinstance(tracks, list):
+            tracks = [tracks]
+        tracks = [track for track in tracks if ".pls" not in track]
+        if not len(tracks):
+            return False
+        track = random.choice(tracks)
+        if not self.check_track_support(track):
+            return False
         if self.audioservice:
             self.audioservice.play(track, utterance="vlc")
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
+        return True
 
     def translate_namedradios(self, name, delim=None):
         delim = delim or ','
@@ -161,6 +168,27 @@ class InternetRadioSkill(MycroftSkill):
         except Exception as e:
             self.log.error(e)
             return {}
+
+    def check_track_support(self, track):
+        if ".pls" in track:
+            if AudioService is None:
+                return False
+            elif not self.check_vlc():
+                return False
+        return True
+
+    def check_vlc(self):
+        if AudioService is None:
+            self.speak_dialog("audio.missing")
+        elif not self.vlc_installed():
+            self.speak_dialog("vlc.missing")
+
+    @staticmethod
+    def vlc_installed():
+        vlc = subprocess.check_output('dpkg -l vlc')
+        if "no packages found matching" in vlc:
+            return False
+        return True
 
     def stop(self):
         if self.audioservice:

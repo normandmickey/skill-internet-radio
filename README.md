@@ -22,7 +22,7 @@ each station in this name is associated to the file name and to each individual 
     listen to metal detector -> plays metal detector
 
 if not direct match for a station is found stations are extracted from
-utterance and fuzzy matched using a single intent, adding new files should
+utterance and fuzzy matched, adding new files should
 enable the new station to be recognized by mycroft
 
 # TODO get new stations from mycroft.home , this will be a list of keywords, streams
