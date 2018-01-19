@@ -29,7 +29,8 @@ from os import listdir
 import random
 import csv
 import subprocess
-from mycroft.audio import wait_while_speaking
+from mycroft.util.parse import fuzzy_match
+
 
 __author__ = 'jarbas'
 
