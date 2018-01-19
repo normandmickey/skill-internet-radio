@@ -160,10 +160,14 @@ class InternetRadioSkill(MycroftSkill):
                     self.speak_dialog('internet.radio', {"station": name})
                     wait_while_speaking()
                     self.audioservice.resume()
-            self.enclosure.mouth_display(img_code="QIAAAAAAAAAAAAAOACADABIBIAMAMPAAAA", x=24,
-                                         refresh=False)
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
+        # music code
+        code = "QIAAAAAAAAAAAAAOACADABIBIAMAMPAAAA"
+        if track in self.settings["stations"]["metal"]:
+            code = "QIAAAAAIAACEBACEAFAJAPAAAJBABAOPAA"
+
+        self.enclosure.mouth_display(img_code=code, x=24, refresh=False)
         return True
 
     def translate_namedradios(self, name, delim=None):
@@ -211,6 +215,7 @@ class InternetRadioSkill(MycroftSkill):
         return True
 
     def stop(self):
+        self.enclosure.reset()
         if self.audioservice:
             if self.audioservice.is_playing:
                 self.audioservice.stop()
