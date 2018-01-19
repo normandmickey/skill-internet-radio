@@ -150,19 +150,20 @@ class InternetRadioSkill(MycroftSkill):
                 track = random.choice(tracks)
             else:
                 return False
-        if self.audioservice:
-            self.audioservice.play(track, utterance="vlc")
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(track)
-
         # Display info on a screen
         self.enclosure.deactivate_mouth_events()
         # music code
         png = join(self.root_dir, "music.png")
 
         self.enclosure.mouth_display_png(png,
-                               threshold=70,
-                               invert=False, x=10, y=0, refresh=True)
+                                         threshold=70,
+                                         invert=False, x=10, y=0,
+                                         refresh=True)
+
+        if self.audioservice:
+            self.audioservice.play(track, utterance="vlc")
+        else:  # othervice use normal mp3 playback
+            self.process = play_mp3(track)
 
         return True
 
