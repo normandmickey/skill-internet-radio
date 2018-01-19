@@ -116,7 +116,10 @@ class InternetRadioSkill(MycroftSkill):
         self.speak_dialog('internet.radio', {"station": best_station})
         wait_while_speaking()
         if self.audioservice:
-            self.audioservice.play(track)
+            if ".pls" in track:
+                self.audioservice.play(track, utterance="vlc")
+            else:
+                self.audioservice.play(track)
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
 
@@ -129,7 +132,10 @@ class InternetRadioSkill(MycroftSkill):
         self.speak_dialog('internet.radio', {"station": best_station})
         wait_while_speaking()
         if self.audioservice:
-            self.audioservice.play(track)
+            if ".pls" in track:
+                self.audioservice.play(track, utterance="vlc")
+            else:
+                self.audioservice.play(track)
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
 
@@ -177,7 +183,6 @@ class InternetRadioSkill(MycroftSkill):
                 self.audioservice.stop()
         else:
             if self.process and self.process.poll() is None:
-                self.speak_dialog('internet.radio.stop')
                 self.process.terminate()
                 self.process.wait()
 
