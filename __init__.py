@@ -15,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-import requests
-import random
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 
@@ -75,11 +72,9 @@ class InternetRadioSkill(MycroftSkill):
         stations = {}
         for style in styles:
             style = style.replace(".value", "")
-            self.log.info(style)
             stations[style] = []
             result = self.translate_namedradios(style)
             for station in result:
-                self.log.info(station)
                 stations[station] = [result[station]]
                 stations[style].append(result[station])
 
@@ -158,7 +153,7 @@ class InternetRadioSkill(MycroftSkill):
                     result[row[0]].append(row[1])
             return result
         except Exception as e:
-            LOG.error(e)
+            self.log.error(e)
             return {}
 
     def stop(self):

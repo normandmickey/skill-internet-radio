@@ -1,1 +1,2 @@
-playing internet radio, station {{ station }}
+playing station {{ station }} internet radio
+you are now listening to {{ station }} internet radio
