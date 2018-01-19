@@ -25,6 +25,7 @@ except:
     AudioService = None
 
 from mycroft.util.parse import fuzzy_match
+from mycroft.audio import wait_while_speaking
 from os.path import join
 from os import listdir
 import random
@@ -152,8 +153,11 @@ class InternetRadioSkill(MycroftSkill):
         if self.audioservice:
             self.audioservice.play(track, utterance="vlc")
             name = self.audioservice.track_info().get("name")
-            if name:
-                self.speak_dialog('internet.radio', {"station": name})
+            if name and "http" not in name:
+                    self.audioservice.pause()
+                    self.speak_dialog('internet.radio', {"station": name})
+                    wait_while_speaking()
+                    self.audioservice.resume()
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
         return True
