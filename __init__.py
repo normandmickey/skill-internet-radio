@@ -121,24 +121,24 @@ class InternetRadioSkill(MycroftSkill):
                         station) else station
 
         tracks = self.settings["stations"][best_station]
-        if not self.play_track(tracks):
+        if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
     def handle_random_intent(self, message):
         # choose a random track for this station/style name
         best_station = random.choice(self.settings["stations"].keys())
         tracks = self.settings["stations"][best_station]
-        if not self.play_track(tracks):
+        if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
     def handle_station_intent(self, message):
         best_station = message.data.get("InternetRadioStation")
         self.stop()
         tracks = self.settings["stations"][best_station]
-        if not self.play_track(tracks):
+        if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
-    def play_track(self, tracks):
+    def play_track(self, tracks, name=""):
         if not isinstance(tracks, list):
             tracks = [tracks]
         if not len(tracks):
@@ -152,8 +152,9 @@ class InternetRadioSkill(MycroftSkill):
                 return False
         if self.audioservice:
             self.audioservice.play(track, utterance="vlc")
-            name = self.audioservice.track_info().get("name")
-            if name and "http" not in name:
+            if not name or "http" in name:
+                name = self.audioservice.track_info().get("name")
+            if name:
                     self.audioservice.pause()
                     self.speak_dialog('internet.radio', {"station": name})
                     wait_while_speaking()
