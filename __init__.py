@@ -29,8 +29,9 @@ from os import listdir
 import random
 import csv
 import subprocess
+from mycroft.audio import wait_while_speaking
 
-__author__ = 'nmoore'
+__author__ = 'jarbas'
 
 
 class InternetRadioSkill(MycroftSkill):
@@ -153,14 +154,23 @@ class InternetRadioSkill(MycroftSkill):
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
 
+        # Display info on a screen
+        self.enclosure.deactivate_mouth_events()
+
         # music code
         if track in self.settings["stations"]["metal"]:
-            code = "IIAAAAIHAPINMHAAAA"
+            self.enclosure.mouth_text("\m/")
         else:
             code = "IIAAAEAEAAEAAGCCAA"
+            self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA",
+                                         refresh=False)
+            self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA", x=24,
+                                         refresh=False)
+            self.enclosure.mouth_display(img_code=code, x=8,
+                                         refresh=False)
 
-        self.enclosure.mouth_display(img_code=code, x=8,
-                                     refresh=False)
+
+
         return True
 
     def translate_namedradios(self, name, delim=None):
@@ -213,7 +223,8 @@ class InternetRadioSkill(MycroftSkill):
         return True
 
     def stop(self):
-        self.enclosure.reset()
+        self.enclosure.activate_mouth_events()
+        self.enclosure.mouth_reset()
         if self.audioservice:
             if self.audioservice.is_playing:
                 self.audioservice.stop()
