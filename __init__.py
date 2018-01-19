@@ -67,6 +67,12 @@ class InternetRadioSkill(MycroftSkill):
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
+    def get_intro_message(self):
+        if AudioService is None:
+            return "Some stations will fail to play because audio service " \
+                   "is missing, please upgrade mycroft-core"
+        # TODO check if vlc is available system wide
+
     def get_stations(self):
         # TODO read remote config stations
 
@@ -116,10 +122,7 @@ class InternetRadioSkill(MycroftSkill):
         self.speak_dialog('internet.radio', {"station": best_station})
         wait_while_speaking()
         if self.audioservice:
-            if ".pls" in track:
-                self.audioservice.play(track, utterance="vlc")
-            else:
-                self.audioservice.play(track)
+            self.audioservice.play(track, utterance="vlc")
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
 
@@ -132,29 +135,11 @@ class InternetRadioSkill(MycroftSkill):
         self.speak_dialog('internet.radio', {"station": best_station})
         wait_while_speaking()
         if self.audioservice:
-            if ".pls" in track:
-                self.audioservice.play(track, utterance="vlc")
-            else:
-                self.audioservice.play(track)
+            self.audioservice.play(track, utterance="vlc")
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
 
     def translate_namedradios(self, name, delim=None):
-        """
-        Load translation dict containing names and values.
-
-        This loads a simple CSV from the 'dialog' folders.
-        The name is the first list item, the value is the
-        second.  Lines prefixed with # or // get ignored
-
-        Args:
-            name (str): name of the .value file, no extension needed
-            delim (char): delimiter character used, default is ','
-
-        Returns:
-            dict: name and value dictionary, or [] if load fails
-        """
-
         delim = delim or ','
         result = {}
         if not name.endswith(".value"):
