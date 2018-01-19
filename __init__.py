@@ -157,12 +157,12 @@ class InternetRadioSkill(MycroftSkill):
 
         # music code
         if track in self.settings["stations"]["metal"]:
-            text = "\m/"
-            self.enclosure.mouth_text(text)
+            code = "IIAAAAIHAPINMHAAAA"
         else:
-            code = "QIAAAAAAAAAAAAAOACADABIBIAMAMPAAAA"
-            self.enclosure.mouth_display(img_code=code, x=10,
-                                         refresh=False)
+            code = "IIAAAEAEAAEAAGCCAA"
+
+        self.enclosure.mouth_display(img_code=code, x=8,
+                                     refresh=False)
         return True
 
     def translate_namedradios(self, name, delim=None):
