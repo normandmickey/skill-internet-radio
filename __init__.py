@@ -24,8 +24,6 @@ except:
     from mycroft.util import play_mp3
     AudioService = None
 
-from mycroft.util.parse import fuzzy_match
-from mycroft.audio import wait_while_speaking
 from os.path import join
 from os import listdir
 import random
@@ -203,6 +201,7 @@ class InternetRadioSkill(MycroftSkill):
             self.speak_dialog("vlc.missing")
 
     def vlc_installed(self):
+        vlc = ""
         try:
             vlc = subprocess.check_output('dpkg -l vlc')
         except Exception as e:
