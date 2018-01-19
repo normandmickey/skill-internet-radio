@@ -82,8 +82,8 @@ class InternetRadioSkill(MycroftSkill):
             result = self.translate_namedradios(style)
             for station in result:
                 station = station.rstrip().lstrip()
-                stations[station] = [result[station]]
-                stations[style].append(result[station])
+                stations[station] = [result[station].rstrip().lstrip()]
+                stations[style].append(result[station].rstrip().lstrip())
 
         # merge into settings
         for station in stations:
@@ -176,7 +176,6 @@ class InternetRadioSkill(MycroftSkill):
     def stop(self):
         if self.audioservice:
             if self.audioservice.is_playing:
-                self.speak_dialog('internet.radio.stop')
                 self.audioservice.stop()
         else:
             if self.process and self.process.poll() is None:
