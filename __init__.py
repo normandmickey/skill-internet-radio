@@ -46,17 +46,12 @@ class InternetRadioSkill(MycroftSkill):
         super(InternetRadioSkill, self).__init__(name="InternetRadioSkill")
         self.audioservice = None
         self.process = None
-        self.stations = {}
-        self.min_score = self.settings.get("min_score", 0.5)
-        self.station_path = self.settings.get("station_files",
-                                              join(self.root_dir, "radios"))
+        self.stations = self.settings.get("stations", {})
 
     def initialize(self):
         self.get_stations()
-
-        intent = IntentBuilder("InternetRadioIntent").require(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_intent)
+        self.register_entity_file("station.entity")
+        self.register_intent_file("internet_radio.intent", self.handle_intent)
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
@@ -65,7 +60,8 @@ class InternetRadioSkill(MycroftSkill):
         # TODO read remote config stations
 
         # read configured radio stations
-        styles = listdir(self.station_path)
+        styles = listdir(self.settings.get("station_files",
+                                              join(self.root_dir, "radios")))
 
         stations = {}
         for style in styles:
@@ -78,8 +74,12 @@ class InternetRadioSkill(MycroftSkill):
         # merge into settings
         for station in stations:
             # do not overwrite any that is already in settings
-            if station not in self.settings.keys():
-                self.settings[station] = stations[station]
+            if station not in self.settings["stations"].keys():
+                self.settings["stations"][station] = stations[station]
+
+        # create padatious entity
+        with open(join(self.vocab_dir, "station.entity"), "w") as f:
+            f.writelines(self.settings["stations"].keys())
 
     def handle_intent(self, message):
         self.stop()
@@ -88,9 +88,9 @@ class InternetRadioSkill(MycroftSkill):
         utterance = message.utterance_remainder()
         best_score = 0.0
         best_station = "favorite"
-        for station in self.settings.keys():
+        for station in self.settings["stations"].keys():
             score = fuzzy_match(station, utterance)
-            if best_score < self.min_score:
+            if best_score < self.settings.get("min_score", 0.5):
                 continue
             if score > best_score:
                 best_station = station
@@ -100,7 +100,7 @@ class InternetRadioSkill(MycroftSkill):
                     station) else station
 
         # choose a random track for this station/style name
-        track = random.choice(self.settings[best_station])
+        track = random.choice(self.settings["stations"][best_station])
         self.speak_dialog('internet.radio', {"station": best_station})
         wait_while_speaking()
         if self.audioservice:

@@ -1,0 +1,6 @@
+(listen | listen to | play | play some | put some) (radio | internet radio | web radio | music)
+let's (listen | listen to | play | play some | put some) (radio | internet radio | web radio | music)
+(listen | listen to | play | play some | put some) to {station}
+(listen | listen to | play | play some | put some) {station} (radio | internet radio | web radio | music)
+(listen | listen to | play | play some | put some) (radio | internet radio | web radio | music) {station}
+{station} (radio | internet radio | web radio | music)
