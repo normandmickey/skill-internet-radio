@@ -43,7 +43,7 @@ LOGGER = getLogger(__name__)
 
 class InternetRadioSkill(MycroftSkill):
     def __init__(self):
-        super(InternetRadioSkill, self).__init__(name="InternetRadioSkill")
+        super(InternetRadioSkill, self).__init__()
         self.audioservice = None
         self.process = None
         self.stations = self.settings.get("stations", {})
@@ -55,6 +55,7 @@ class InternetRadioSkill(MycroftSkill):
             .optionally("PlayKeyword") \
             .optionally("InternetRadioStation") \
             .require("InternetRadioKeyword").build()
+
         self.register_intent(intent, self.handle_intent)
 
         if AudioService:

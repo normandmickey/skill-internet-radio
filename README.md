@@ -35,7 +35,7 @@ enable the new station to be recognized by mycroft
 * "play some music"
 * "rock radio"
 * "play rock radio"
-* "listen to rock radio"using a single intent
+* "listen to rock radio"
 * "country radio"
 * "play country radio"
 * "listen to country radio"
