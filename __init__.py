@@ -40,7 +40,6 @@ class InternetRadioSkill(MycroftSkill):
         super(InternetRadioSkill, self).__init__()
         self.audioservice = None
         self.process = None
-        self.stations = {"favorite": ["http://somafm.com/groovesalad.pls"]}
 
     def initialize(self):
         if "stations" not in self.settings:
@@ -49,7 +48,6 @@ class InternetRadioSkill(MycroftSkill):
             self.settings["station_files"] = join(self.root_dir, "radios")
         if "min_score" not in self.settings:
             self.settings["min_score"] = 0.5
-        self.stations = self.settings.get("stations", {})
 
         self.get_stations()
 
@@ -64,7 +62,7 @@ class InternetRadioSkill(MycroftSkill):
             .optionally("InternetRadioKeyword")\
             .optionally("PlayKeyword").build()
 
-        self.register_intent(intent, self.handle_intent)
+        self.register_intent(intent, self.handle_station_intent)
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
