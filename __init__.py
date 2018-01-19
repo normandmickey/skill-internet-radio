@@ -50,8 +50,12 @@ class InternetRadioSkill(MycroftSkill):
 
     def initialize(self):
         self.get_stations()
-        self.register_entity_file("station.entity")
-        self.register_intent_file("internet_radio.intent", self.handle_intent)
+
+        intent = IntentBuilder("InternetRadioIntent") \
+            .optionally("PlayKeyword") \
+            .optionally("InternetRadioStation") \
+            .require("InternetRadioKeyword").build()
+        self.register_intent(intent, self.handle_intent)
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
@@ -78,26 +82,28 @@ class InternetRadioSkill(MycroftSkill):
                 self.settings["stations"][station] = stations[station]
 
         # create padatious entity
-        with open(join(self.vocab_dir, "station.entity"), "w") as f:
-            f.writelines(self.settings["stations"].keys())
+        for station in self.settings["stations"].keys():
+            self.register_vocabulary(station, "InternetRadioStation")
 
     def handle_intent(self, message):
+        best_station = message.data.get("InternetRadioStation")
         self.stop()
 
-        # guess if some station was requested
-        utterance = message.utterance_remainder()
-        best_score = 0.0
-        best_station = "favorite"
-        for station in self.settings["stations"].keys():
-            score = fuzzy_match(station, utterance)
-            if best_score < self.settings.get("min_score", 0.5):
-                continue
-            if score > best_score:
-                best_station = station
-            elif score == best_score:
-                # chose the smallest name
-                best_station = best_station if len(best_station) < len(
-                    station) else station
+        if not best_station:
+            # guess if some station was requested
+            utterance = message.utterance_remainder()
+            best_score = 0.0
+            best_station = "favorite"
+            for station in self.settings["stations"].keys():
+                score = fuzzy_match(station, utterance)
+                if best_score < self.settings.get("min_score", 0.5):
+                    continue
+                if score > best_score:
+                    best_station = station
+                elif score == best_score:
+                    # chose the smallest name
+                    best_station = best_station if len(best_station) < len(
+                        station) else station
 
         # choose a random track for this station/style name
         track = random.choice(self.settings["stations"][best_station])

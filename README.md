@@ -21,7 +21,7 @@ each station in this name is associated to the file name and to each individual 
     put some death fm music -> plays death fm
     listen to metal detector -> plays metal detector
 
-the intent is triggered by padatious, stations are extracted from
+if not direct match for a station is found stations are extracted from
 utterance and fuzzy matched using a single intent, adding new files should
 enable the new station to be recognized by mycroft
 
@@ -35,7 +35,7 @@ enable the new station to be recognized by mycroft
 * "play some music"
 * "rock radio"
 * "play rock radio"
-* "listen to rock radio"
+* "listen to rock radio"using a single intent
 * "country radio"
 * "play country radio"
 * "listen to country radio"
