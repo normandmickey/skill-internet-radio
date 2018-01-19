@@ -156,20 +156,18 @@ class InternetRadioSkill(MycroftSkill):
 
         # Display info on a screen
         self.enclosure.deactivate_mouth_events()
-
+        self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA",
+                                     refresh=False)
+        self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA", x=24,
+                                     refresh=False)
         # music code
         if track in self.settings["stations"]["metal"]:
-            self.enclosure.mouth_text("\m/")
+            png = join(self.root_dir, "metal.png")
         else:
-            code = "IIAAAEAEAAEAAGCCAA"
-            self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA",
-                                         refresh=False)
-            self.enclosure.mouth_display(img_code="HIAAAAAAAAAAAAAA", x=24,
-                                         refresh=False)
-            self.enclosure.mouth_display(img_code=code, x=8,
-                                         refresh=False)
-
-
+            png = join(self.root_dir, "music.png")
+        self.mouth_display_png(png,
+                               threshold=70,
+                               invert=False, x=0, y=0, refresh=True)
 
         return True
 
@@ -211,13 +209,13 @@ class InternetRadioSkill(MycroftSkill):
             self.speak_dialog("vlc.missing")
 
     def vlc_installed(self):
-        vlc = ""
+        # TODO fix me
+        return True
         try:
             vlc = subprocess.check_output('dpkg -l vlc')
         except Exception as e:
             self.log.warning(e)
-            # TODO fix me
-            return True
+            return False
         if "no packages found matching" in vlc:
             return False
         return True
