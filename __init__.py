@@ -21,14 +21,22 @@ import random
 from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill
 from mycroft.util.log import getLogger
+
 try:
     from mycroft.skills.audioservice import AudioService
 except:
     from mycroft.util import play_mp3
+
     AudioService = None
 
-__author__ = 'nmoore'
+from mycroft.audio import wait_while_speaking
+from mycroft.util.parse import fuzzy_match
+from os.path import join
+from os import listdir
+import random
+import csv
 
+__author__ = 'nmoore'
 
 LOGGER = getLogger(__name__)
 
@@ -38,377 +46,116 @@ class InternetRadioSkill(MycroftSkill):
         super(InternetRadioSkill, self).__init__(name="InternetRadioSkill")
         self.audioservice = None
         self.process = None
+        self.stations = {}
+        self.min_score = self.settings.get("min_score", 0.5)
+        self.station_path = self.settings.get("station_files",
+                                              join(self.root_dir, "radios"))
 
     def initialize(self):
+        self.get_stations()
+
         intent = IntentBuilder("InternetRadioIntent").require(
-             "InternetRadioKeyword").build()
+            "InternetRadioKeyword").build()
         self.register_intent(intent, self.handle_intent)
-
-        intent = IntentBuilder("HarkIntent").require(
-             "HarkKeyword").require("RadioSearch").build()
-        self.register_intent(intent, self.handle_hark_intent)
-
-        intent = IntentBuilder("CountryRadioIntent").require(
-             "CountryRadioKeyword").build()
-        self.register_intent(intent, self.handle_country_intent)
-
-        intent = IntentBuilder("RockRadioIntent").require(
-             "RockRadioKeyword").build()
-        self.register_intent(intent, self.handle_rock_intent)
-
-        intent = IntentBuilder("ClassicalRadioIntent").require(
-             "ClassicalRadioKeyword").build()
-        self.register_intent(intent, self.handle_classical_intent)
-
-        intent = IntentBuilder("Top40RadioIntent").require(
-             "Top40RadioKeyword").build()
-        self.register_intent(intent, self.handle_top40_intent)
-
-        intent = IntentBuilder("JazzRadioIntent").require(
-             "JazzRadioKeyword").build()
-        self.register_intent(intent, self.handle_jazz_intent)
-
-        intent = IntentBuilder("ChristmasRadioIntent").require(
-             "ChristmasRadioKeyword").build()
-        self.register_intent(intent, self.handle_christmas_intent)
-
-        intent = IntentBuilder("ChildrensRadioIntent").require(
-             "ChildrensRadioKeyword").build()
-        self.register_intent(intent, self.handle_childrens_intent)
-
-        intent = IntentBuilder("InternetRadioStopIntent") \
-                .require("InternetRadioStopVerb") \
-                .require("InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_stop)
-
-        intent = IntentBuilder("DarkPsyRadioIntent").require(
-            "DarkKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_dark_psy_intent)
-
-        intent = IntentBuilder("DarkProgressivePsyRadioIntent").require(
-            "DarkKeyword").require("ProgressiveKeyword").require(
-            "PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_dark_prog_psy_intent)
-
-        intent = IntentBuilder("ProgressivePsyRadioIntent").require("ProgressiveKeyword").require(
-            "PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_prog_psy_intent)
-
-        intent = IntentBuilder("FullonPsyRadioIntent").require(
-            "FullOnKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_fullon_intent)
-
-        intent = IntentBuilder("GoaPsyRadioIntent").require(
-            "GoaKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_goa_intent)
-
-        intent = IntentBuilder("ForestPsyRadioIntent").require(
-            "ForestKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_forest_intent)
-
-        intent = IntentBuilder("SuomiPsyRadioIntent").require(
-            "SuomiKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_suomi_intent)
-
-        intent = IntentBuilder("HitechCorePsyRadioIntent").require(
-            "HiTechKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_hitech_psy_intent)
-
-        intent = IntentBuilder("OrochillPsyRadioIntent").require(
-            "OrochillKeyword").require("PsytubeKeyword").optionally(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_orochill_intent)
-
-        intent = IntentBuilder("TechnoRadioIntent").require(
-            "TechnoRadioKeyword").optionally("PsytubeKeyword").require(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_techno_intent)
-
-        intent = IntentBuilder("MinimalTechnoRadioIntent").require(
-            "MinimalTechnoRadioKeyword").optionally(
-            "PsytubeKeyword").require(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_minimal_techno_intent)
-
-        intent = IntentBuilder("DNBRadioIntent").require(
-            "DrumNBassRadioKeyword").optionally(
-            "PsytubeKeyword").require(
-            "InternetRadioKeyword").build()
-        self.register_intent(intent, self.handle_dnb_intent)
-
-        intent = IntentBuilder("PsytubeInternetRadioIntent").require(
-            "InternetRadioKeyword").require(
-            "PsytubeKeyword").build()
-        self.register_intent(intent, self.handle_psytube_intent)
 
         if AudioService:
             self.audioservice = AudioService(self.emitter)
 
-    def handle_psytube_intent(self, message):
-        self.stop()
-        self.speak_dialog('psytube')
-        time.sleep(4)
-        urls = ["dark_psy_trance_station_url",
-                "progressive_psy_trance_station_url",
-                "dark_progressive_psy_trance_station_url",
-                "forest_psy_trance_station_url",
-                "suomi_psy_trance_station_url",
-                "fullon_psy_trance_station_url",
-                "goa_psy_trance_station_url"]
-        if self.audioservice:
-            self.audioservice.play(random.choice(urls))
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(random.choice(urls))
+    def get_stations(self):
+        # TODO read remote config stations
 
-    def handle_hitech_psy_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
+        # read configured radio stations
+        styles = listdir(self.station_path)
 
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'hitech_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'hitech_psy_trance_station_url'])
+        stations = {}
+        for style in styles:
+            stations[style] = []
+            result = self.translate_namedradios(style)
+            for station in result:
+                stations[station] = [result[station]]
+                stations[style].append(result[station])
 
-    def handle_dark_psy_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'dark_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'dark_psy_trance_station_url'])
-
-    def handle_dark_prog_psy_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'dark_progressive_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'dark_progressive_psy_trance_station_url'])
-
-    def handle_prog_psy_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'progressive_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'progressive_psy_trance_station_url'])
-
-    def handle_fullon_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'fullon_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'fullon_psy_trance_station_url'])
-
-    def handle_goa_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'goa_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'goa_psy_trance_station_url'])
-
-    def handle_forest_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings[
-                                       'forest_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings[
-                                        'forest_psy_trance_station_url'])
-
-    def handle_suomi_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings['suomi_psy_trance_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings['suomi_psy_trance_station_url'])
-
-    def handle_orochill_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings['orochill_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings['orochill_station_url'])
-
-    def handle_techno_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings['techno_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings['techno_station_url'])
-
-    def handle_minimal_techno_intent(self, message):
-        self.stop()
-        self.speak_dialog('internet.radio')
-        time.sleep(4)
-
-        if self.audioservice:
-            self.audioservice.play(self.settings['minimal_techno_station_url'])
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(self.settings['minimal_techno_station_url'])
-
-    def handle_dnb_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['drumnbass_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['drumnbass_station_url'])
+        # merge into settings
+        for station in stations:
+            # do not overwrite any that is already in settings
+            if station not in self.settings.keys():
+                self.settings[station] = stations[station]
 
     def handle_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-           search_string = message.data.get('RadioSearch')
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['station_url'])
-
-    def handle_hark_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-           search_string = message.data.get('RadioSearch')
-           s_details = requests.get('http://greatesthits.rocks:5000/station')
-           stations = s_details.json()
-           stream_url2 = 'none'
-           for station in stations:
-               if (search_string).lower() == station['name'].lower():
-                  stream_url = station['url']
-                  stream_url2 = stream_url.encode('utf-8')
-                  self.audioservice.play(stream_url2)
-                  break
-
-    def handle_country_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['country_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['country_station_url'])
-
-    def handle_rock_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['rock_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['rock_station_url'])
-    
-    def handle_classical_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['classical_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['classical_station_url'])
-
-    def handle_top40_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['top40_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['top40_station_url'])
-
-    def handle_jazz_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['jazz_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['jazz_station_url'])
-
-    def handle_christmas_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['christmas_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['christmas_station_url'])
-             
-    def handle_childrens_intent(self, message):
-           self.stop()
-           self.speak_dialog('internet.radio')
-           time.sleep(4)
-
-           if self.audioservice:
-               self.audioservice.play(self.settings['childrens_station_url'])
-           else: # othervice use normal mp3 playback
-               self.process = play_mp3(self.settings['childrens_station_url'])
-             
-    def handle_stop(self, message):
         self.stop()
-        self.speak_dialog('internet.radio.stop')
+
+        # guess if some station was requested
+        utterance = message.utterance_remainder()
+        best_score = 0.0
+        best_station = "favorite"
+        for station in self.settings.keys():
+            score = fuzzy_match(station, utterance)
+            if best_score < self.min_score:
+                continue
+            if score > best_score:
+                best_station = station
+            elif score == best_score:
+                # chose the smallest name
+                best_station = best_station if len(best_station) < len(
+                    station) else station
+
+        # choose a random track for this station/style name
+        track = random.choice(self.settings[best_station])
+        self.speak_dialog('internet.radio', {"station": best_station})
+        wait_while_speaking()
+        if self.audioservice:
+            self.audioservice.play(track)
+        else:  # othervice use normal mp3 playback
+            self.process = play_mp3(track)
+
+    def translate_namedradios(self, name, delim=None):
+        """
+        Load translation dict containing names and values.
+
+        This loads a simple CSV from the 'dialog' folders.
+        The name is the first list item, the value is the
+        second.  Lines prefixed with # or // get ignored
+
+        Args:
+            name (str): name of the .value file, no extension needed
+            delim (char): delimiter character used, default is ','
+
+        Returns:
+            dict: name and value dictionary, or [] if load fails
+        """
+
+        delim = delim or ','
+        result = {}
+        if not name.endswith(".value"):
+            name += ".value"
+
+        try:
+            with open(join(self.station_path, name)) as f:
+                reader = csv.reader(f, delimiter=delim)
+                for row in reader:
+                    # skip blank or comment lines
+                    if not row or row[0].startswith("#"):
+                        continue
+                    if len(row) != 2:
+                        continue
+                    if row[0] not in result.keys():
+                        result[row[0]] = []
+                    result[row[0]].append(row[1])
+            return result
+        except Exception:
+            return {}
 
     def stop(self):
         if self.audioservice:
-           self.audioservice.stop()
+            if self.audioservice.is_playing():
+                self.speak_dialog('internet.radio.stop')
+                self.audioservice.stop()
         else:
             if self.process and self.process.poll() is None:
-               self.process.terminate()
-               self.process.wait()
+                self.speak_dialog('internet.radio.stop')
+                self.process.terminate()
+                self.process.wait()
+
 
 def create_skill():
     return InternetRadioSkill()

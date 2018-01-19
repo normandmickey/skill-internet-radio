@@ -1,8 +1,0 @@
-{
-  "utterance": "stop",
-  "intent_type": "InternetRadioStopIntent",
-  "intent": {
-    "InternetRadioKeyword": "internet radio",
-    "InternetRadioStopVerb": "stop"
-  }
-}

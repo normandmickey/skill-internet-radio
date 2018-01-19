@@ -1,7 +1,0 @@
-{
-  "utterance": "Country Radio",
-  "intent_type": "Country Radio Intent",
-  "intent": {
-    "CountryRadioKeyword": "country radio"
-  }
-}
