@@ -151,12 +151,12 @@ class InternetRadioSkill(MycroftSkill):
                 track = random.choice(tracks)
             else:
                 return False
-        # Display info on a screen
+        # Display icon on faceplate
         self.enclosure.deactivate_mouth_events()
         # music code
-        png = join(self.root_dir, "music.png")
+        png = "IIAEAOOHGAGEGOOHAA"
 
-        self.enclosure.mouth_display_png(png,
+        self.enclosure.mouth_display(png,
                                          threshold=70,
                                          invert=False, x=10, y=0,
                                          refresh=True)
