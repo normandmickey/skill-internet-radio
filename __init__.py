@@ -156,8 +156,7 @@ class InternetRadioSkill(MycroftSkill):
         # music code
         png = "IIAEAOOHGAGEGOOHAA"
 
-        self.enclosure.mouth_display(png,
-                                         invert=False, x=10, y=0,
+        self.enclosure.mouth_display(png,  x=10, y=0,
                                          refresh=True)
 
         if self.audioservice:
