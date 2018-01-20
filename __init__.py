@@ -65,7 +65,7 @@ class InternetRadioSkill(MycroftSkill):
 
         intent = IntentBuilder("InternetRadioStationIntent") \
             .require("InternetRadioStation")\
-            .optionally("InternetRadioKeyword")\
+            .require("InternetRadioKeyword")\
             .optionally("PlayKeyword").build()
 
         self.register_intent(intent, self.handle_station_intent)
