@@ -102,7 +102,6 @@ class InternetRadioSkill(MycroftSkill):
             self.register_vocabulary(station, "InternetRadioStation")
 
     def handle_intent(self, message):
-        self.stop()
         # guess if some station was requested
         utterance = message.utterance_remainder()
         self.log.info("remainder: " + utterance)
@@ -134,7 +133,6 @@ class InternetRadioSkill(MycroftSkill):
 
     def handle_station_intent(self, message):
         best_station = message.data.get("InternetRadioStation")
-        self.stop()
         tracks = self.settings["stations"][best_station]
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
@@ -160,6 +158,8 @@ class InternetRadioSkill(MycroftSkill):
                                          refresh=True)
 
         if self.audioservice:
+            if self.audioservice.is_playing:
+                self.audioservice.stop()
             self.audioservice.play(track, utterance="vlc")
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(track)
