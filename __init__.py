@@ -157,7 +157,6 @@ class InternetRadioSkill(MycroftSkill):
         png = "IIAEAOOHGAGEGOOHAA"
 
         self.enclosure.mouth_display(png,
-                                         threshold=70,
                                          invert=False, x=10, y=0,
                                          refresh=True)
 
