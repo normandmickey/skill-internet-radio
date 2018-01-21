@@ -110,7 +110,7 @@ class InternetRadioSkill(MycroftSkill):
             for station in self.settings["stations"].keys():
                 score = fuzzy_match(station, utterance)
                 self.log.info(str(score) + " " + station)
-                if best_score < self.settings.get("min_score", 0.5):
+                if best_score < self.settings.get("min_score", 0.3):
                     continue
                 if score > best_score:
                     best_station = station
