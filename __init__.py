@@ -65,8 +65,7 @@ class InternetRadioSkill(MycroftSkill):
 
         intent = IntentBuilder("InternetRadioStationIntent") \
             .require("InternetRadioStation")\
-            .require("InternetRadioKeyword")\
-            .optionally("PlayKeyword").build()
+            .one_of("PlayKeyword", "InternetRadioKeyword").build()
 
         self.register_intent(intent, self.handle_station_intent)
 
@@ -110,7 +109,7 @@ class InternetRadioSkill(MycroftSkill):
         if len(utterance):
             for station in self.settings["stations"].keys():
                 score = fuzzy_match(station, utterance)
-                self.log.info(str(score) + " station")
+                self.log.info(str(score) + " " + station)
                 if best_score < self.settings.get("min_score", 0.5):
                     continue
                 if score > best_score:
