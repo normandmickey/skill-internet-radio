@@ -30,6 +30,7 @@ import random
 import csv
 import subprocess
 from mycroft.util.parse import fuzzy_match
+from mycroft.audio import wait_while_speaking
 
 
 __author__ = 'jarbas'
@@ -108,10 +109,10 @@ class InternetRadioSkill(MycroftSkill):
         best_station = "favorite"
         if len(utterance):
             for station in self.settings["stations"].keys():
-                score = fuzzy_match(station, utterance)
-                self.log.info(str(score) + " " + station)
                 if best_score < self.settings.get("min_score", 0.3):
                     continue
+                score = fuzzy_match(station, utterance)
+                self.log.info(str(score) + " " + station)
                 if score > best_score:
                     best_station = station
                 elif score == best_score:
@@ -120,6 +121,7 @@ class InternetRadioSkill(MycroftSkill):
                         station) else station
 
         tracks = self.settings["stations"][best_station]
+        self.log.info("Now playing: " + str(tracks))
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
@@ -139,14 +141,9 @@ class InternetRadioSkill(MycroftSkill):
     def play_track(self, tracks, name=""):
         if not isinstance(tracks, list):
             tracks = [tracks]
-        if not len(tracks):
-            return False
-        track = random.choice(tracks)
-        if not self.check_track_support(track):
+        if not self.check_track_support(tracks):
             tracks = [track for track in tracks if ".pls" not in track]
-            if len(tracks):
-                track = random.choice(tracks)
-            else:
+            if not len(tracks):
                 return False
         # Display icon on faceplate
         self.enclosure.deactivate_mouth_events()
@@ -156,12 +153,14 @@ class InternetRadioSkill(MycroftSkill):
         self.enclosure.mouth_display(png,  x=10, y=0,
                                          refresh=True)
 
+        self.speak_dialog("internet.radio", {"station": name})
+        wait_while_speaking()
         if self.audioservice:
             if self.audioservice.is_playing:
                 self.audioservice.stop()
-            self.audioservice.play(track, utterance="vlc")
+            self.audioservice.play(tracks, utterance="vlc")
         else:  # othervice use normal mp3 playback
-            self.process = play_mp3(track)
+            self.process = play_mp3(random.choice(tracks))
 
         return True
 
@@ -188,12 +187,13 @@ class InternetRadioSkill(MycroftSkill):
             self.log.error(e)
             return {}
 
-    def check_track_support(self, track):
-        if ".pls" in track:
-            if AudioService is None:
-                return False
-            elif not self.vlc_installed():
-                return False
+    def check_track_support(self, tracks):
+        for track in tracks:
+            if ".pls" in track:
+                if AudioService is None:
+                    return False
+                elif not self.vlc_installed():
+                    return False
         return True
 
     def check_vlc(self):
