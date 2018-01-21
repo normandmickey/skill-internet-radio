@@ -66,7 +66,9 @@ class InternetRadioSkill(MycroftSkill):
 
         intent = IntentBuilder("InternetRadioStationIntent") \
             .require("InternetRadioStation")\
-            .one_of("PlayKeyword", "InternetRadioKeyword").build()
+            .require("InternetRadioKeyword").build()
+            #.one_of("PlayKeyword", "InternetRadioKeyword").build()
+        # triggers too much
 
         self.register_intent(intent, self.handle_station_intent)
 
@@ -115,12 +117,13 @@ class InternetRadioSkill(MycroftSkill):
                 self.log.info(str(score) + " " + station)
                 if score > best_score:
                     best_station = station
+                    best_score = score
                 elif score == best_score:
                     # chose the smallest name
                     best_station = best_station if len(best_station) < len(
                         station) else station
 
-        tracks = self.settings["stations"][best_station]
+        tracks = self.settings["stations"][best_station][0]
         self.log.info("Now playing: " + str(tracks))
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
@@ -158,6 +161,7 @@ class InternetRadioSkill(MycroftSkill):
         if self.audioservice:
             if self.audioservice.is_playing:
                 self.audioservice.stop()
+            self.log.debug(str(tracks))
             self.audioservice.play(tracks, utterance="vlc")
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(random.choice(tracks))
@@ -182,6 +186,7 @@ class InternetRadioSkill(MycroftSkill):
                     if row[0] not in result.keys():
                         result[row[0].rstrip().lstrip()] = []
                     result[row[0]].append(row[1].rstrip().lstrip())
+            print result
             return result
         except Exception as e:
             self.log.error(e)
