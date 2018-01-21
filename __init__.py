@@ -29,7 +29,7 @@ from os import listdir
 import random
 import csv
 import subprocess
-from mycroft.util.parse import fuzzy_match
+from mycroft.util.parse import fuzzy_match, normalize
 from mycroft.audio import wait_while_speaking
 
 
@@ -111,7 +111,7 @@ class InternetRadioSkill(MycroftSkill):
         best_station = "favorite"
         if len(utterance):
             for station in self.settings["stations"].keys():
-                score = fuzzy_match(station, utterance)
+                score = fuzzy_match(normalize(station, self.lang), utterance)
                 if score < float(self.settings["min_score"]):
                     continue
                 self.log.info(str(score) + " " + station)
@@ -131,13 +131,13 @@ class InternetRadioSkill(MycroftSkill):
     def handle_random_intent(self, message):
         # choose a random track for this station/style name
         best_station = random.choice(self.settings["stations"].keys())
-        tracks = self.settings["stations"][best_station]
+        tracks = self.settings["stations"][best_station][0]
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
     def handle_station_intent(self, message):
         best_station = message.data.get("InternetRadioStation")
-        tracks = self.settings["stations"][best_station]
+        tracks = self.settings["stations"][best_station][0]
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
@@ -161,7 +161,6 @@ class InternetRadioSkill(MycroftSkill):
         if self.audioservice:
             if self.audioservice.is_playing:
                 self.audioservice.stop()
-            self.log.debug(str(tracks))
             self.audioservice.play(tracks, utterance="vlc")
         else:  # othervice use normal mp3 playback
             self.process = play_mp3(random.choice(tracks))
