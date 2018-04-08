@@ -16,158 +16,30 @@
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.core import MycroftSkill
+from mycroft.skills.core import intent_handler
 
-try:
-    from mycroft.skills.audioservice import AudioService
-except:
-    from mycroft.util import play_mp3
-    AudioService = None
-
-from os.path import join
+from os.path import join, dirname
 from os import listdir
 import random
 import csv
-import subprocess
-from mycroft.util.parse import fuzzy_match, normalize
+from mycroft.util.parse import match_one, normalize
 from mycroft.audio import wait_while_speaking
+from mycroft_jarbas_utils.skills.audio import AudioSkill
 
 
 __author__ = 'jarbas'
 
 
-class InternetRadioSkill(MycroftSkill):
+class InternetRadioSkill(AudioSkill):
     def __init__(self):
         super(InternetRadioSkill, self).__init__()
-        self.audioservice = None
-        self.process = None
-
-    def initialize(self):
-        if "stations" not in self.settings:
-            self.settings["stations"] = {"favorite": ["http://somafm.com/groovesalad.pls"]}
+        self.stations = {}
         if "station_files" not in self.settings:
-            self.settings["station_files"] = join(self.root_dir, "radios")
+            self.settings["station_files"] = join(dirname(__file__), "radios")
         if "min_score" not in self.settings:
             self.settings["min_score"] = 0.3
 
-        self.get_stations()
-
-        intent = IntentBuilder("InternetRadioIntent") \
-            .optionally("PlayKeyword") \
-            .require("InternetRadioKeyword").build()
-
-        self.register_intent(intent, self.handle_intent)
-
-        intent = IntentBuilder("RandomInternetRadioIntent") \
-            .optionally("PlayKeyword") \
-            .require("InternetRadioKeyword").require("RandomKeyword").build()
-
-        self.register_intent(intent, self.handle_random_intent)
-
-        intent = IntentBuilder("InternetRadioStationIntent") \
-            .require("InternetRadioStation")\
-            .require("InternetRadioKeyword").build()
-            #.one_of("PlayKeyword", "InternetRadioKeyword").build()
-        # triggers too much
-
-        self.register_intent(intent, self.handle_station_intent)
-
-        if AudioService:
-            self.audioservice = AudioService(self.emitter)
-
-        self.check_vlc()
-
-    def get_stations(self):
-        # TODO read remote config stations
-
-        # read configured radio stations
-        styles = listdir(self.settings.get("station_files"))
-
-        stations = {}
-        for style in styles:
-            style = style.replace(".value", "")
-            stations[style] = []
-            result = self.translate_namedradios(style)
-            for station in result:
-                station = station.rstrip().lstrip()
-                stations[station] = [result[station]]
-                stations[style].append(result[station])
-
-        # merge into settings
-        for station in stations:
-            # do not overwrite any that is already in settings
-            if station not in self.settings["stations"].keys():
-                self.settings["stations"][station] = stations[station]
-
-        # create vocabulary
-        for station in self.settings["stations"].keys():
-            self.register_vocabulary(station, "InternetRadioStation")
-
-    def handle_intent(self, message):
-        # guess if some station was requested
-        utterance = message.utterance_remainder()
-        self.log.info("remainder: " + utterance)
-        best_score = 0.0
-        best_station = "favorite"
-        if len(utterance):
-            for station in self.settings["stations"].keys():
-                score = fuzzy_match(normalize(station, self.lang), utterance)
-                if score < float(self.settings["min_score"]):
-                    continue
-                self.log.info(str(score) + " " + station)
-                if score > best_score:
-                    best_station = station
-                    best_score = score
-                elif score == best_score:
-                    # chose the smallest name
-                    best_station = best_station if len(best_station) < len(
-                        station) else station
-
-        tracks = self.settings["stations"][best_station][0]
-        self.log.info("Now playing: " + str(tracks))
-        if not self.play_track(tracks, best_station):
-            self.speak_dialog("invalid.track", {"station": best_station})
-
-    def handle_random_intent(self, message):
-        # choose a random track for this station/style name
-        best_station = random.choice(self.settings["stations"].keys())
-        tracks = self.settings["stations"][best_station][0]
-        if not self.play_track(tracks, best_station):
-            self.speak_dialog("invalid.track", {"station": best_station})
-
-    def handle_station_intent(self, message):
-        best_station = message.data.get("InternetRadioStation")
-        tracks = self.settings["stations"][best_station][0]
-        if not self.play_track(tracks, best_station):
-            self.speak_dialog("invalid.track", {"station": best_station})
-
-    def play_track(self, tracks, name=""):
-        if not isinstance(tracks, list):
-            tracks = [tracks]
-        if not self.check_track_support(tracks):
-            tracks = [track for track in tracks if ".pls" not in track]
-            if not len(tracks):
-                return False
-        # Display icon on faceplate
-        self.enclosure.deactivate_mouth_events()
-        # music code
-        png = "IIAEAOOHGAGEGOOHAA"
-
-        self.enclosure.mouth_display(png,  x=10, y=0,
-                                         refresh=True)
-
-        self.speak_dialog("internet.radio", {"station": name})
-        wait_while_speaking()
-        if self.audioservice:
-            if self.audioservice.is_playing:
-                self.audioservice.stop()
-            self.audioservice.play(tracks, utterance="vlc")
-        else:  # othervice use normal mp3 playback
-            self.process = play_mp3(random.choice(tracks))
-
-        return True
-
-    def translate_namedradios(self, name, delim=None):
+    def translate_named_radios(self, name, delim=None):
         delim = delim or ','
         result = {}
         if not name.endswith(".value"):
@@ -185,52 +57,82 @@ class InternetRadioSkill(MycroftSkill):
                     if row[0] not in result.keys():
                         result[row[0].rstrip().lstrip()] = []
                     result[row[0]].append(row[1].rstrip().lstrip())
-            print result
             return result
         except Exception as e:
-            self.log.error(e)
+            self.log.error(str(e))
             return {}
 
-    def check_track_support(self, tracks):
-        for track in tracks:
-            if ".pls" in track:
-                if AudioService is None:
-                    return False
-                elif not self.vlc_installed():
-                    return False
-        return True
+    def get_stations_from_file(self):
+        # read configured radio stations
+        stations = {}
 
-    def check_vlc(self):
-        if AudioService is None:
-            self.speak_dialog("audio.missing")
-            return False
-        elif not self.vlc_installed():
-            self.speak_dialog("vlc.missing")
-            return False
-        return True
+        styles = listdir(self.settings["station_files"])
+        for style in styles:
+            name = style.replace(".value", "")
+            if name not in stations:
+                stations[name] = []
+            style_stations = self.translate_named_radios(
+                                self.settings["station_files"], style)
+            for station_name in style_stations:
+                if station_name not in stations:
+                    stations[station_name] = style_stations[station_name]
+                else:
+                    stations[station_name] += style_stations[station_name]
+                stations[name] += style_stations[station_name]
 
-    def vlc_installed(self):
-        # TODO fix me
-        return True
-        try:
-            vlc = subprocess.check_output('dpkg -l vlc')
-        except Exception as e:
-            self.log.warning(e)
+        return stations
+
+    @intent_handler(IntentBuilder("InternetRadioIntent")
+                    .optionally("PlayKeyword")
+                    .require("InternetRadioKeyword"))
+    def handle_radio_intent(self, message):
+        # guess if some station was requested
+        utterance = normalize(message.utterance_remainder(), self.lang)
+        self.log.info("remainder: " + utterance)
+        best_station = "favorite"
+        if utterance:
+            best_station = match_one(utterance, self.stations.keys())
+
+        tracks = random.shuffle(self.stations[best_station])
+        self.log.info("Now playing: " + str(tracks))
+        if not self.play_track(tracks, best_station):
+            self.speak_dialog("invalid.track", {"station": best_station})
+
+    @intent_handler(IntentBuilder("RandomInternetRadioIntent")
+                    .optionally("PlayKeyword")
+                    .require("InternetRadioKeyword")
+                    .require("RandomKeyword"))
+    def handle_random_intent(self, message):
+        # choose a random track for this station/style name
+        best_station = random.choice(self.stations.keys())
+        tracks = self.stations[best_station]
+        if not self.play_track(tracks, best_station):
+            self.speak_dialog("invalid.track", {"station": best_station})
+
+    def play_track(self, tracks, name=""):
+        if not isinstance(tracks, list):
+            tracks = [tracks]
+        if not len(tracks):
             return False
-        if "no packages found matching" in vlc:
-            return False
+        # Display icon on faceplate
+        self.enclosure.deactivate_mouth_events()
+        # music code
+        png = "IIAEAOOHGAGEGOOHAA"
+
+        self.enclosure.mouth_display(png,  x=10, y=0,
+                                         refresh=True)
+
+        self.speak_dialog("internet.radio", {"station": name})
+        wait_while_speaking()
+        self.stop()
+        self.play(tracks)
         return True
 
     def stop(self):
         self.enclosure.activate_mouth_events()
         self.enclosure.mouth_reset()
-        if self.audioservice:
-            if self.audioservice.is_playing:
-                self.audioservice.stop()
-        else:
-            if self.process and self.process.poll() is None:
-                self.process.terminate()
-                self.process.wait()
+        if self.audio.is_playing:
+            self.audio.stop()
 
 
 def create_skill():
