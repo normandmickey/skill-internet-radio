@@ -23,7 +23,6 @@ from os import listdir
 import random
 import csv
 from mycroft.util.parse import match_one, normalize
-from mycroft.audio import wait_while_speaking
 from mycroft_jarbas_utils.skills.audio import AudioSkill
 
 
@@ -114,25 +113,10 @@ class InternetRadioSkill(AudioSkill):
             tracks = [tracks]
         if not len(tracks):
             return False
-        # Display icon on faceplate
-        self.enclosure.deactivate_mouth_events()
-        # music code
-        png = "IIAEAOOHGAGEGOOHAA"
-
-        self.enclosure.mouth_display(png,  x=10, y=0,
-                                         refresh=True)
 
         self.speak_dialog("internet.radio", {"station": name})
-        wait_while_speaking()
-        self.stop()
         self.play(tracks)
         return True
-
-    def stop(self):
-        self.enclosure.activate_mouth_events()
-        self.enclosure.mouth_reset()
-        if self.audio.is_playing:
-            self.audio.stop()
 
 
 def create_skill():
