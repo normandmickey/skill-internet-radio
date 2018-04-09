@@ -35,12 +35,8 @@ class InternetRadioSkill(AudioSkill):
         self.stations = {}
         if "station_files" not in self.settings:
             self.settings["station_files"] = join(dirname(__file__), "radios")
-        self.settings.set_changed_callback(self.get_stations_from_file)
-
-    def initialize(self):
-        self.get_stations_from_file()
-        for s in self.stations:
-            self.register_vocabulary("radio_station", s)
+        if "min_score" not in self.settings:
+            self.settings["min_score"] = 0.4
 
     def translate_named_radios(self, name, delim=None):
         delim = delim or ','
@@ -67,27 +63,23 @@ class InternetRadioSkill(AudioSkill):
 
     def get_stations_from_file(self):
         # read configured radio stations
-        stations = {}
-
         styles = listdir(self.settings["station_files"])
         for style in styles:
             name = style.replace(".value", "")
-            if name not in stations:
-                stations[name] = []
-            style_stations = self.translate_named_radios(style)
+            if name not in self.stations:
+                self.stations[name] = []
+            style_stations = self.translate_named_radios(
+                                self.settings["station_files"], style)
             for station_name in style_stations:
-                if station_name not in stations:
-                    stations[station_name] = style_stations[station_name]
+                if station_name not in self.stations:
+                    self.stations[station_name] = style_stations[station_name]
                 else:
-                    stations[station_name] += style_stations[station_name]
-                stations[name] += style_stations[station_name]
-
-        return stations
+                    self.stations[station_name] += style_stations[station_name]
+                    self.stations[name] += style_stations[station_name]
 
     @intent_handler(IntentBuilder("InternetRadioIntent")
                     .optionally("PlayKeyword")
-                    .require("InternetRadioKeyword")
-                    .optionally("radio_station"))
+                    .require("InternetRadioKeyword"))
     def handle_radio_intent(self, message):
         # guess if some station was requested
         utterance = normalize(message.utterance_remainder(), self.lang)
@@ -96,7 +88,7 @@ class InternetRadioSkill(AudioSkill):
         if utterance:
             best_station = match_one(utterance, self.stations.keys())
 
-        tracks = self.stations[best_station]
+        tracks = random.shuffle(self.stations[best_station])
         self.log.info("Now playing: " + str(tracks))
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
