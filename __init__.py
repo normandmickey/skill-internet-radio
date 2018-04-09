@@ -68,8 +68,7 @@ class InternetRadioSkill(AudioSkill):
             name = style.replace(".value", "")
             if name not in self.stations:
                 self.stations[name] = []
-            style_stations = self.translate_named_radios(
-                                self.settings["station_files"], style)
+            style_stations = self.translate_named_radios(style)
             for station_name in style_stations:
                 if station_name not in self.stations:
                     self.stations[station_name] = style_stations[station_name]
