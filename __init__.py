@@ -35,8 +35,12 @@ class InternetRadioSkill(AudioSkill):
         self.stations = {}
         if "station_files" not in self.settings:
             self.settings["station_files"] = join(dirname(__file__), "radios")
-        if "min_score" not in self.settings:
-            self.settings["min_score"] = 0.3
+        self.settings.set_changed_callback(self.get_stations_from_file)
+
+    def initialize(self):
+        self.get_stations_from_file()
+        for s in self.stations:
+            self.register_vocabulary("radio_station", s)
 
     def translate_named_radios(self, name, delim=None):
         delim = delim or ','
@@ -70,8 +74,7 @@ class InternetRadioSkill(AudioSkill):
             name = style.replace(".value", "")
             if name not in stations:
                 stations[name] = []
-            style_stations = self.translate_named_radios(
-                                self.settings["station_files"], style)
+            style_stations = self.translate_named_radios(style)
             for station_name in style_stations:
                 if station_name not in stations:
                     stations[station_name] = style_stations[station_name]
@@ -83,7 +86,8 @@ class InternetRadioSkill(AudioSkill):
 
     @intent_handler(IntentBuilder("InternetRadioIntent")
                     .optionally("PlayKeyword")
-                    .require("InternetRadioKeyword"))
+                    .require("InternetRadioKeyword")
+                    .optionally("radio_station"))
     def handle_radio_intent(self, message):
         # guess if some station was requested
         utterance = normalize(message.utterance_remainder(), self.lang)
