@@ -96,7 +96,7 @@ class InternetRadioSkill(AudioSkill):
         if utterance:
             best_station = match_one(utterance, self.stations.keys())
 
-        tracks = random.shuffle(self.stations[best_station])
+        tracks = self.stations[best_station]
         self.log.info("Now playing: " + str(tracks))
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
@@ -108,7 +108,7 @@ class InternetRadioSkill(AudioSkill):
     def handle_random_intent(self, message):
         # choose a random track for this station/style name
         best_station = random.choice(self.stations.keys())
-        tracks = random.shuffle(self.stations[best_station])
+        tracks = self.stations[best_station]
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
