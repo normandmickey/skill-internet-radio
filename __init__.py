@@ -65,16 +65,24 @@ class InternetRadioSkill(AudioSkill):
         # read configured radio stations
         styles = listdir(self.settings["station_files"])
         for style in styles:
+            self.log.info("loading radio stations from: " + style)
             name = style.replace(".value", "")
             if name not in self.stations:
                 self.stations[name] = []
             style_stations = self.translate_named_radios(style)
             for station_name in style_stations:
+                self.log.info("loading station: " + station_name)
                 if station_name not in self.stations:
-                    self.stations[station_name] = style_stations[station_name]
+                    self.stations[station_name] = []
                 else:
-                    self.stations[station_name] += style_stations[station_name]
-                    self.stations[name] += style_stations[station_name]
+                    for s in style_stations[station_name]:
+                        if s not in self.stations[station_name]:
+                            self.log.info("adding url: " + s)
+                            self.stations[station_name].append(s)
+                for s in style_stations[station_name]:
+                    if s not in self.stations[name]:
+                        self.log.info("adding url: " + s)
+                        self.stations[name].append(s)
 
     @intent_handler(IntentBuilder("InternetRadioIntent")
                     .optionally("PlayKeyword")
