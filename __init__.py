@@ -20,6 +20,7 @@ class InternetRadioSkill(AudioSkill):
             self.settings["station_files"] = join(dirname(__file__), "radios")
         if "min_score" not in self.settings:
             self.settings["min_score"] = 0.4
+        self.settings.set_changed_callback(self.get_stations_from_file)
 
     def translate_named_radios(self, name, delim=None):
         delim = delim or ','
