@@ -7,7 +7,7 @@ import random
 import csv
 from mycroft.util.parse import match_one, normalize
 from mycroft_jarbas_utils.skills.audio import AudioSkill
-
+from time import sleep
 
 __author__ = 'jarbas'
 
@@ -21,6 +21,7 @@ class InternetRadioSkill(AudioSkill):
         if "min_score" not in self.settings:
             self.settings["min_score"] = 0.4
         self.settings.set_changed_callback(self.get_stations_from_file)
+        self.get_stations_from_file()
 
     def translate_named_radios(self, name, delim=None):
         delim = delim or ','
@@ -37,15 +38,18 @@ class InternetRadioSkill(AudioSkill):
                         continue
                     if len(row) != 2:
                         continue
+                    row[0] = row[0].rstrip().lstrip()
+                    row[1] = row[1].rstrip().lstrip()
                     if row[0] not in result.keys():
-                        result[row[0].rstrip().lstrip()] = []
-                    result[row[0]].append(row[1].rstrip().lstrip())
+                        result[row[0]] = []
+                    result[row[0]].append(row[1])
             return result
         except Exception as e:
             self.log.error(str(e))
             return {}
 
     def get_stations_from_file(self):
+        self.stations = {} # reset in case path changed
         # read configured radio stations
         styles = listdir(self.settings["station_files"])
         for style in styles:
@@ -77,9 +81,10 @@ class InternetRadioSkill(AudioSkill):
         self.log.info("remainder: " + utterance)
         best_station = "favorite"
         if utterance:
-            best_station = match_one(utterance, self.stations.keys())
+            best_station, score = match_one(utterance, self.stations.keys())
 
-        tracks = random.shuffle(self.stations[best_station])
+        tracks = self.stations[best_station]
+        random.shuffle(tracks)
         self.log.info("Now playing: " + str(tracks))
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
@@ -92,6 +97,7 @@ class InternetRadioSkill(AudioSkill):
         # choose a random track for this station/style name
         best_station = random.choice(self.stations.keys())
         tracks = self.stations[best_station]
+        random.shuffle(tracks)
         if not self.play_track(tracks, best_station):
             self.speak_dialog("invalid.track", {"station": best_station})
 
@@ -100,9 +106,17 @@ class InternetRadioSkill(AudioSkill):
             tracks = [tracks]
         if not len(tracks):
             return False
-
         self.speak_dialog("internet.radio", {"station": name})
+        self.log.info("playing track: " + str(tracks))
         self.play(tracks)
+
+        sleep(3)  # give time for track start
+        track = self.audio.track_info()
+        # display track name
+        if track.get("name"):
+            self.enclosure.mouth_text(track["name"])
+        elif track.get("track"):
+            self.enclosure.mouth_text(track["track"])
         return True
 
 
