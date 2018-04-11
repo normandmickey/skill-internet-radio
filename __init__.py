@@ -110,7 +110,7 @@ class InternetRadioSkill(AudioSkill):
         self.log.info("playing track: " + str(tracks))
         self.play(tracks)
 
-        sleep(4)  # give time for track start
+        sleep(6)  # give time for track start
         track = self.audio.track_info()
         # display track name
         if track.get("name"):
