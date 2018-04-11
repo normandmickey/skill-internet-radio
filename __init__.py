@@ -110,13 +110,15 @@ class InternetRadioSkill(AudioSkill):
         self.log.info("playing track: " + str(tracks))
         self.play(tracks)
 
-        sleep(3)  # give time for track start
+        sleep(4)  # give time for track start
         track = self.audio.track_info()
         # display track name
         if track.get("name"):
             self.enclosure.mouth_text(track["name"])
         elif track.get("track"):
             self.enclosure.mouth_text(track["track"])
+        elif name:
+            self.enclosure.mouth_text(name)
         return True
 
 
